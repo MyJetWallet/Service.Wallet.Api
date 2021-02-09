@@ -86,5 +86,54 @@ namespace Service.Wallet.Api.Controllers
                 return ctx.Request.Headers[headerName];
             return ctx.Request.Scheme;
         }
+
+
+        private const string AuthorizationHeader = "authorization";
+
+        /// <summary>
+        /// Get trader id of request
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException">Throws if token is expired, wrong or does not exist</exception>
+        public static string GetTraderId(this HttpContext ctx)
+        {
+            if (!ctx.Request.Headers.ContainsKey(AuthorizationHeader))
+                throw new UnauthorizedAccessException("UnAuthorized request");
+
+            var itm = ctx.Request.Headers[AuthorizationHeader].ToString().Trim();
+            var items = itm.Split();
+            return items[^1].GetTraderIdByToken();
+
+        }
+
+        /// <summary>
+        /// GetTraderIdByToken
+        /// </summary>
+        /// <param name="tokenString"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        public static string GetTraderIdByToken(this string tokenString)
+        {
+            try
+            {
+                //var (result, token) = TokensManager.TokensManager.ParseBase64Token<AuthorizationToken>(tokenString, ServiceLocator.SessionEncodingKey, DateTime.UtcNow);
+
+                //if (result == TokenParseResult.Expired)
+                //    throw new UnauthorizedAccessException("UnAuthorized request");
+
+                //if (result == TokenParseResult.InvalidToken)
+                //    throw new UnauthorizedAccessException("UnAuthorized request");
+
+                if (tokenString != "alex-test")
+                    throw new UnauthorizedAccessException("UnAuthorized request");
+
+                return tokenString;
+            }
+            catch (Exception)
+            {
+                throw new UnauthorizedAccessException("UnAuthorized request");
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Service.Wallet.Api.Controllers
 {
@@ -23,6 +24,15 @@ namespace Service.Wallet.Api.Controllers
         public IActionResult HelloWorld()
         {
             return Ok("Hello world!");
+        }
+
+
+        [HttpGet("test")]
+        [Authorize()]
+        public IActionResult TestAuth()
+        {
+            var traderId = User.Identity.Name;
+            return Ok($"Hello {traderId}");
         }
     }
 }

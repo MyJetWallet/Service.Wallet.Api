@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Builder;
@@ -7,9 +8,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
+using JetBrains.Annotations;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using MyJetWallet.Sdk.Service;
 using Prometheus;
+using Service.Wallet.Api.Authentication;
 using Service.Wallet.Api.Hubs;
 using Service.Wallet.Api.Middleware;
 using Service.Wallet.Api.Modules;
@@ -49,7 +56,12 @@ namespace Service.Wallet.Api
                 option.EnableDetailedErrors = true;
 
             }).AddMessagePackProtocol();
+            
+            services
+                .AddAuthentication(o => { o.DefaultScheme = "Bearer"; })
+                .AddScheme<WalletAuthenticationOptions, WalletAuthHandler>("Bearer", o => { });
 
+            //services.AddSingleton<WalletAuthHandler>();
 
         }
 
@@ -60,7 +72,7 @@ namespace Service.Wallet.Api
             app.UseMiddleware<ExceptionLogMiddleware>();
 
             app.BindMetricsMiddleware();
-
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -81,6 +93,14 @@ namespace Service.Wallet.Api
             app.UseSwaggerUi3();
 
             app.BindDebugMiddleware();
+
+            
+
+            
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+
 
             app.UseEndpoints(endpoints =>
             {
