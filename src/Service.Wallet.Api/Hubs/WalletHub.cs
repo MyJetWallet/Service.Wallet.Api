@@ -43,6 +43,8 @@ namespace Service.Wallet.Api.Hubs
         {
             Console.WriteLine($"--> [Init] {token}");
 
+            // todo: Add to trader log SignalR Connection Event
+
             var ctx = new HubClientConnection(Context, Clients.Caller, token);
 
             HubConnections.Connected(ctx);
@@ -52,17 +54,29 @@ namespace Service.Wallet.Api.Hubs
             await Clients.Caller.SendAsync(HubNames.Welcome, message);
         }
 
-        
 
-
-
-
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override Task OnDisconnectedAsync(Exception exception)
         {
             var httpContext = Context.GetHttpContext();
             _logger.LogInformation("HUB [WalletHub] is disconnected. ConnectionId: {ConnectionId}. Exception: {}", httpContext?.Connection?.Id, exception?.ToString());
 
-            await base.OnDisconnectedAsync(exception);
+
+
+            var connection = this.TryGetConnection();
+
+            if (connection != null)
+            {
+                // todo: Add to trader log SignalR Disconnection Event
+
+                HubConnections.Disconnected(Context.ConnectionId);
+            }
+
+            return base.OnDisconnectedAsync(exception);
+        }
+
+        private HubClientConnection TryGetConnection()
+        {
+            return HubConnections.TryGet(Context.ConnectionId);
         }
     }
 }
