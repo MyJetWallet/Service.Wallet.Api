@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
-using JetBrains.Annotations;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization.Policy;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using MyJetWallet.Sdk.Service;
 using Prometheus;
@@ -49,7 +44,10 @@ namespace Service.Wallet.Api
             services.AddApplicationInsightsTelemetry(Configuration);
             services.SetupSwaggerDocumentation();
             services.ConfigurateHeaders();
-            services.AddControllers();//.AddNewtonsoftJson(); //todo: ask why we use NewtonsoftJson?
+            services.AddControllers(options => 
+            {
+                
+            });//.AddNewtonsoftJson(); //todo: ask why we use NewtonsoftJson?
 
             services.AddSignalR(option =>
             {
@@ -69,7 +67,7 @@ namespace Service.Wallet.Api
         {
             app.UseForwardedHeaders();
 
-            app.UseMiddleware<ExceptionLogMiddleware>();
+            //app.UseMiddleware<ExceptionLogMiddleware>();
 
             app.BindMetricsMiddleware();
             
@@ -94,9 +92,9 @@ namespace Service.Wallet.Api
 
             app.BindDebugMiddleware();
 
-            
+            app.UseMiddleware<ExceptionLogMiddleware>();
 
-            
+
             app.UseAuthentication();
             app.UseAuthorization();
 

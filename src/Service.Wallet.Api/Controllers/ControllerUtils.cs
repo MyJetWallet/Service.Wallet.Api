@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using MyJetWallet.Domain;
 using Newtonsoft.Json;
+using Service.Wallet.Api.Controllers.Contracts;
 using SimpleTrading.TokensManager;
 using SimpleTrading.TokensManager.Tokens;
 
@@ -125,8 +129,8 @@ namespace Service.Wallet.Api.Controllers
                 //if (result == TokenParseResult.InvalidToken)
                 //    throw new UnauthorizedAccessException("UnAuthorized request");
 
-                if (tokenString != "alex-test")
-                    throw new UnauthorizedAccessException("UnAuthorized request");
+                //if (tokenString != "alex-test")
+                //    throw new UnauthorizedAccessException("UnAuthorized request");
 
                 return tokenString;
             }
@@ -134,6 +138,45 @@ namespace Service.Wallet.Api.Controllers
             {
                 throw new UnauthorizedAccessException("UnAuthorized request");
             }
+        }
+
+        public static ValueTask<IJetWalletIdentity> GetWalletIdentityAsync(this ControllerBase controller, string walletId)
+        {
+            var clientId = controller.GetClientIdentity();
+
+            //todo: get wallet from nosql, If not found call to wallet service to get or create
+            //todo: if in wallet list wallet id do not exist then return error
+
+            return new ValueTask<IJetWalletIdentity>(
+                new JetWalletIdentity(clientId.BrokerId, clientId.BrandId, clientId.ClientId, walletId)
+            );
+        }
+
+        public const string DefaultBroker = "default";
+
+        public static IJetClientIdentity GetClientIdentity(this ControllerBase controller)
+        {
+            var brandId = controller.GetBrandIdentity();
+
+            var traderId = controller?.User?.Identity?.Name;
+
+            if (string.IsNullOrEmpty(traderId))
+                throw new WalletApiBadRequestException("Cannot extract user from request context.");
+
+            return new JetClientIdentity(brandId.BrokerId, brandId.BrandId, traderId);
+        }
+
+        public static IJetBrokerIdentity GetBrokerIdentity(this ControllerBase controller)
+        {
+            return new JetBrokerIdentity(){BrokerId = DefaultBroker };
+        }
+
+        public static IJetBrandIdentity GetBrandIdentity(this ControllerBase controller)
+        {
+            var brokerId = controller.GetBrokerIdentity();
+
+            //todo: extract brand some how
+            return new JetBrandIdentity(brokerId.BrokerId, "default-brand");
         }
     }
 }

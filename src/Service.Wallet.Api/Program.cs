@@ -49,6 +49,7 @@ namespace Service.Wallet.Api
                 {
                     webBuilder.ConfigureKestrel(options =>
                     {
+                        Console.WriteLine("Http port: 8080");
                         options.Listen(IPAddress.Any, 8080, o => o.Protocols = HttpProtocols.Http1);
                     });
 

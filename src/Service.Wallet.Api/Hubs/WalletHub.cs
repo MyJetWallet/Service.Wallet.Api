@@ -52,6 +52,19 @@ namespace Service.Wallet.Api.Hubs
             var message = WelcomeMessage.Create($"Hello {token}");
 
             await Clients.Caller.SendAsync(HubNames.Welcome, message);
+
+            //todo: Send wallet list (wallet name, walletId, is default)
+            
+            //todo: Send asset dictionary: [spot instrument list]; [send asset list (assetId, Name, accuracy,..., list of exchange assets and pairs detail)]
+        }
+
+        [SignalRIncomingRequest]
+        public async Task SetWallet(string walletId)
+        {
+            //todo: associate connection with wallet
+            //todo: send balances
+            //todo: send active orders
+            //todo: send asset deposit\withdrawal list (asset, deposit processors[], withdrawal processors[])
         }
 
 
