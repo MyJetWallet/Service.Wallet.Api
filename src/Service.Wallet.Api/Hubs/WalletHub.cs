@@ -85,6 +85,10 @@ namespace Service.Wallet.Api.Hubs
             //todo: Send wallet list (wallet name, walletId, is default)
 
             await ctx.SendWalletListAsync();
+
+            var defaultWallet = await _walletService.GetDefaultWalletAsync(ctx.ClientId);
+
+            await SetWallet(defaultWallet.WalletId);
         }
 
         [SignalRIncomingRequest]
@@ -118,6 +122,19 @@ namespace Service.Wallet.Api.Hubs
 
             await ctx.SendWalletAssetsAsync();
             await ctx.SendWalletSpotInstrumentsAsync();
+        }
+
+        public async Task Ping()
+        {
+            var ctx = TryGetConnection();
+
+            if (ctx == null)
+            {
+                _logger.LogInformation("[HUB][ERROR] Receive Ping but connection do not inited");
+                return;
+            }
+
+            await ctx.SendPongAsync();
         }
 
         private HubClientConnection TryGetConnection()

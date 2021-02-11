@@ -19,7 +19,7 @@ namespace Service.Wallet.Api.Domain.Assets
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
         }
 
-        public List<WalletAsset> GetWalletAssets(JetWalletIdentity wallet)
+        public List<WalletAsset> GetWalletAssets(IJetWalletIdentity wallet)
         {
             var assets = _assetsDictionaryClient
                 .GetAssetsByBrand(wallet)
@@ -30,7 +30,7 @@ namespace Service.Wallet.Api.Domain.Assets
             return assets;
         }
 
-        public List<WalletSpotInstrument> GetWalletSpotInstrument(JetWalletIdentity wallet)
+        public List<WalletSpotInstrument> GetWalletSpotInstrument(IJetWalletIdentity wallet)
         {
             var instruments = _spotInstrumentDictionaryClient
                 .GetSpotInstrumentByBrand(wallet)

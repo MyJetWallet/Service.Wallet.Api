@@ -16,18 +16,39 @@ namespace Service.Wallet.Api.Hubs
 
             var message = new WalletListMessage {Wallets = wallets};
 
-            await ClientProxy.SendAsync(HubNames.WalletList, message);
+            await SendAsync(HubNames.WalletList, message);
         }
 
         public async Task SendWalletAssetsAsync()
         {
-            throw new System.NotImplementedException();
+            var wallet = GetWalletId();
+
+            var assets = _assetService.GetWalletAssets(wallet);
+
+            var message = new AssetListMessage()
+            {
+                Assets = assets
+            };
+
+            await SendAsync(HubNames.AssetList, message);
         }
 
         public async Task SendWalletSpotInstrumentsAsync()
         {
-            throw new System.NotImplementedException();
+            var wallet = GetWalletId();
+
+            var instruments = _assetService.GetWalletSpotInstrument(wallet);
+
+            var message = new SpotInstrumentListMessage()
+            {
+                SpotInstruments = instruments
+            };
+
+            await SendAsync(HubNames.SpotInstrumentList, message);
         }
+
+
+
 
         private IJetClientIdentity GetClientId()
         {
@@ -35,6 +56,24 @@ namespace Service.Wallet.Api.Hubs
                 throw new Exception($"SignalR connection ({ConnectionId}) doesn't inited");
 
             return ClientId;
+        }
+
+        private IJetWalletIdentity GetWalletId()
+        {
+            if (WalletId == null)
+                throw new Exception($"SignalR connection ({ConnectionId}) doesn't associate with wallet");
+
+            return WalletId;
+        }
+
+        private Task SendAsync(string method, object message)
+        {
+            return ClientProxy.SendAsync(method, message);
+        }
+
+        public async Task SendPongAsync()
+        {
+            await SendAsync(HubNames.Pong, new PongMessage());
         }
     }
 }

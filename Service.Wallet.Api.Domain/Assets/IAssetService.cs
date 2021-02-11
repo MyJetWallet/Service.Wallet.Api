@@ -7,7 +7,7 @@ namespace Service.Wallet.Api.Domain.Assets
 {
     public interface IAssetService
     {
-        List<WalletAsset> GetWalletAssets(JetWalletIdentity wallet);
-        List<WalletSpotInstrument> GetWalletSpotInstrument(JetWalletIdentity wallet);
+        List<WalletAsset> GetWalletAssets(IJetWalletIdentity wallet);
+        List<WalletSpotInstrument> GetWalletSpotInstrument(IJetWalletIdentity wallet);
     }
 }

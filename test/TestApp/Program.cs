@@ -35,25 +35,52 @@ namespace TestApp
             
             connection.On<WelcomeMessage>(HubNames.Welcome, (message) =>
             {
-                Console.WriteLine($"--> [{HubNames.Welcome}] {message.Data}");
+                Console.WriteLine($"--> [{HubNames.Welcome}] {message.Data}\r\n");
             });
 
             connection.On<WalletListMessage>(HubNames.WalletList, message =>
             {
-                Console.WriteLine($"--> [{HubNames.WalletList}] {JsonConvert.SerializeObject(message)}");
+                Console.WriteLine($"--> [{HubNames.WalletList}] {JsonConvert.SerializeObject(message)}\r\n");
             });
 
-            
+            connection.On<AssetListMessage>(HubNames.AssetList, message =>
+            {
+                Console.WriteLine($"--> [{HubNames.AssetList}] {JsonConvert.SerializeObject(message)}\r\n");
+            });
 
+            connection.On<SpotInstrumentListMessage>(HubNames.SpotInstrumentList, message =>
+            {
+                Console.WriteLine($"--> [{HubNames.SpotInstrumentList}] {JsonConvert.SerializeObject(message)}\r\n");
+            });
+
+            connection.On<PongMessage>(HubNames.Pong, message =>
+            {
+                Console.WriteLine($"--> [{HubNames.Pong}] {JsonConvert.SerializeObject(message)}\r\n");
+            });
+            
             await connection.StartAsync();
 
-            await connection.InvokeAsync("Init", "Alex");
-            
+            await connection.SendAsync(HubNames.Init, "alex");
+
+            var run = true;
+
+            var task = Task.Run(async () =>
+            {
+                while (run)
+                {
+                    await Task.Delay(5000);
+                    await connection.SendAsync(HubNames.Ping);
+                }
+            });
 
 
             Console.WriteLine("Press enter to exit");
             Console.ReadLine();
-            Console.ReadLine();
+
+            run = false;
+            await task;
+
+            Console.WriteLine("End of app");
         }
     }
 }
