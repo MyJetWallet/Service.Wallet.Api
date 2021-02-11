@@ -1,9 +1,8 @@
 ﻿using Autofac;
-using MyJetWallet.Sdk.Service;
 using Service.Wallet.Api.Domain.Assets;
 using Service.Wallet.Api.Domain.Wallets;
-using Service.Wallet.Api.Settings;
-using SimpleTrading.SettingsReader;
+using Service.Wallet.Api.Hubs;
+using Service.Wallet.Api.Jobs;
 
 namespace Service.Wallet.Api.Modules
 {
@@ -11,6 +10,10 @@ namespace Service.Wallet.Api.Modules
     {
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterType<HubManager>()
+                .As<IHubManager>()
+                .SingleInstance();
+
             builder
                 .RegisterType<AssetService>()
                 .As<IAssetService>()
@@ -20,6 +23,12 @@ namespace Service.Wallet.Api.Modules
                 .RegisterType<WalletService>()
                 .As<IWalletService>()
                 .SingleInstance();
+
+            builder
+                .RegisterType<AssetDictionaryChangesNotificator>()
+                .As<IStartable>()
+                .SingleInstance()
+                .AutoActivate();
         }
     }
 }

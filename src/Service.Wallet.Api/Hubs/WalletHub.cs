@@ -14,18 +14,21 @@ namespace Service.Wallet.Api.Hubs
     public class WalletHub: Hub
     {
         private readonly ILogger<WalletHub> _logger;
+        private readonly IHubManager _hubManager;
         private readonly IAssetService _assetService;
         private readonly IWalletService _walletService;
 
-        internal static readonly HubClientConnections HubConnections = new HubClientConnections();
+        
         
         public const string AccessTokenParamName = "access_token";
 
-        public WalletHub(ILogger<WalletHub> logger, 
+        public WalletHub(ILogger<WalletHub> logger,
+            IHubManager hubManager,
             IAssetService assetService,
             IWalletService walletService)
         {
             _logger = logger;
+            _hubManager = hubManager;
             _assetService = assetService;
             _walletService = walletService;
         }
@@ -56,7 +59,7 @@ namespace Service.Wallet.Api.Hubs
             {
                 // todo: Add to trader log SignalR Disconnection Event
 
-                HubConnections.Disconnected(Context.ConnectionId);
+                _hubManager.Disconnected(Context.ConnectionId);
             }
 
             _logger.LogInformation("HUB [WalletHub] is disconnected. ConnectionId: {ConnectionId}. Exception: {exception}. Broker/Brand/Client/Wallet: {brokerId}/{brandId}/{clientId}", 
@@ -74,7 +77,7 @@ namespace Service.Wallet.Api.Hubs
 
             var ctx = new HubClientConnection(Context, Clients.Caller, token, _assetService, _walletService);
 
-            HubConnections.Connected(ctx);
+            _hubManager.Connected(ctx);
 
             var message = WelcomeMessage.Create($"Hello {token}");
 
@@ -139,7 +142,7 @@ namespace Service.Wallet.Api.Hubs
 
         private HubClientConnection TryGetConnection()
         {
-            return HubConnections.TryGet(Context.ConnectionId);
+            return _hubManager.TryGetContext(Context.ConnectionId);
         }
     }
 }
