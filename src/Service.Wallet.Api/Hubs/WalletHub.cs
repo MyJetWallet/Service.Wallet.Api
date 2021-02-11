@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Service.Wallet.Api.Domain.Assets;
+using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Hubs.Dto;
 
 namespace Service.Wallet.Api.Hubs
@@ -12,14 +14,20 @@ namespace Service.Wallet.Api.Hubs
     public class WalletHub: Hub
     {
         private readonly ILogger<WalletHub> _logger;
+        private readonly IAssetService _assetService;
+        private readonly IWalletService _walletService;
 
         internal static readonly HubClientConnections HubConnections = new HubClientConnections();
         
         public const string AccessTokenParamName = "access_token";
 
-        public WalletHub(ILogger<WalletHub> logger)
+        public WalletHub(ILogger<WalletHub> logger, 
+            IAssetService assetService,
+            IWalletService walletService)
         {
             _logger = logger;
+            _assetService = assetService;
+            _walletService = walletService;
         }
 
         public override async Task OnConnectedAsync()
@@ -38,6 +46,25 @@ namespace Service.Wallet.Api.Hubs
             await base.OnConnectedAsync();
         }
 
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            var httpContext = Context.GetHttpContext();
+
+            var ctx = this.TryGetConnection();
+
+            if (ctx != null)
+            {
+                // todo: Add to trader log SignalR Disconnection Event
+
+                HubConnections.Disconnected(Context.ConnectionId);
+            }
+
+            _logger.LogInformation("HUB [WalletHub] is disconnected. ConnectionId: {ConnectionId}. Exception: {exception}. Broker/Brand/Client/Wallet: {brokerId}/{brandId}/{clientId}", 
+                httpContext?.Connection?.Id, exception?.ToString(), ctx?.ClientId?.BrokerId, ctx?.ClientId?.BrandId, ctx?.ClientId?.ClientId, ctx?.WalletId?.WalletId);
+
+            return base.OnDisconnectedAsync(exception);
+        }
+
         [SignalRIncomingRequest]
         public async Task Init(string token)
         {
@@ -45,7 +72,7 @@ namespace Service.Wallet.Api.Hubs
 
             // todo: Add to trader log SignalR Connection Event
 
-            var ctx = new HubClientConnection(Context, Clients.Caller, token);
+            var ctx = new HubClientConnection(Context, Clients.Caller, token, _assetService, _walletService);
 
             HubConnections.Connected(ctx);
 
@@ -53,38 +80,44 @@ namespace Service.Wallet.Api.Hubs
 
             await Clients.Caller.SendAsync(HubNames.Welcome, message);
 
+            _logger.LogInformation("[HUB] Init connection ({connectionId}) for Broker/Brand/Client: {brokerId}/{brandId}/{clientId}", ctx.ConnectionId, ctx.ClientId.BrokerId, ctx.ClientId.BrandId, ctx.ClientId.ClientId);
+
             //todo: Send wallet list (wallet name, walletId, is default)
-            
-            //todo: Send asset dictionary: [spot instrument list]; [send asset list (assetId, Name, accuracy,..., list of exchange assets and pairs detail)]
+
+            await ctx.SendWalletListAsync();
         }
 
         [SignalRIncomingRequest]
         public async Task SetWallet(string walletId)
         {
+            //todo: Send asset dictionary: [spot instrument list]; [send asset list (assetId, Name, accuracy,..., list of exchange assets and pairs detail)]
             //todo: associate connection with wallet
             //todo: send balances
             //todo: send active orders
             //todo: send asset deposit\withdrawal list (asset, deposit processors[], withdrawal processors[])
-        }
 
+            var ctx = TryGetConnection();
 
-        public override Task OnDisconnectedAsync(Exception exception)
-        {
-            var httpContext = Context.GetHttpContext();
-            _logger.LogInformation("HUB [WalletHub] is disconnected. ConnectionId: {ConnectionId}. Exception: {}", httpContext?.Connection?.Id, exception?.ToString());
-
-
-
-            var connection = this.TryGetConnection();
-
-            if (connection != null)
+            if (ctx == null)
             {
-                // todo: Add to trader log SignalR Disconnection Event
-
-                HubConnections.Disconnected(Context.ConnectionId);
+                _logger.LogInformation("[HUB][ERROR] Receive SetWallet but connection do not inited");
+                return;
             }
 
-            return base.OnDisconnectedAsync(exception);
+            var wallet = await _walletService.GetWalletIdentityByIdAsync(ctx.ClientId, walletId);
+
+            if (wallet == null)
+            {
+                _logger.LogInformation("[HUB][ERROR] Receive SetWallet with wrong walletId ({walletId}). Broker/Brand/Client: {brokerId}/{brandId}/{clientId}", walletId, ctx.ClientId.BrokerId, ctx.ClientId.BrandId, ctx.ClientId.ClientId);
+            }
+
+            ctx.SetWalletId(wallet);
+
+            _logger.LogInformation("[HUB] Set wallet ({walletId}) to connection ({connectionId}) for Broker/Brand/Client: {brokerId}/{brandId}/{clientId}", 
+                walletId, ctx.ConnectionId, ctx.ClientId.BrokerId, ctx.ClientId.BrandId, ctx.ClientId.ClientId);
+
+            await ctx.SendWalletAssetsAsync();
+            await ctx.SendWalletSpotInstrumentsAsync();
         }
 
         private HubClientConnection TryGetConnection()

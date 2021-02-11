@@ -140,9 +140,17 @@ namespace Service.Wallet.Api.Controllers
             }
         }
 
-        public static ValueTask<IJetWalletIdentity> GetWalletIdentityAsync(this ControllerBase controller, string walletId)
+        public static ValueTask<IJetWalletIdentity> GetWalletIdentityAsync(this HttpContext context, string walletId)
         {
-            var clientId = controller.GetClientIdentity();
+            var clientId = context.GetClientIdentity();
+
+            return context.GetWalletIdentityAsync(walletId, clientId);
+        }
+
+        public static ValueTask<IJetWalletIdentity> GetWalletIdentityAsync(this HttpContext context, string walletId, IJetClientIdentity clientId)
+        {
+            if (string.IsNullOrEmpty(walletId))
+                throw new WalletApiBadRequestException("Wallet cannot be empty");
 
             //todo: get wallet from nosql, If not found call to wallet service to get or create
             //todo: if in wallet list wallet id do not exist then return error
@@ -152,13 +160,13 @@ namespace Service.Wallet.Api.Controllers
             );
         }
 
-        public const string DefaultBroker = "default";
+        public const string DefaultBroker = "jetwallet";
 
-        public static IJetClientIdentity GetClientIdentity(this ControllerBase controller)
+        public static IJetClientIdentity GetClientIdentity(this HttpContext context)
         {
-            var brandId = controller.GetBrandIdentity();
+            var brandId = context.GetBrandIdentity();
 
-            var traderId = controller?.User?.Identity?.Name;
+            var traderId = context?.User?.Identity?.Name;
 
             if (string.IsNullOrEmpty(traderId))
                 throw new WalletApiBadRequestException("Cannot extract user from request context.");
@@ -166,17 +174,26 @@ namespace Service.Wallet.Api.Controllers
             return new JetClientIdentity(brandId.BrokerId, brandId.BrandId, traderId);
         }
 
-        public static IJetBrokerIdentity GetBrokerIdentity(this ControllerBase controller)
+        public static IJetBrokerIdentity GetBrokerIdentity(this HttpContext context)
         {
             return new JetBrokerIdentity(){BrokerId = DefaultBroker };
         }
 
-        public static IJetBrandIdentity GetBrandIdentity(this ControllerBase controller)
+        public static IJetBrandIdentity GetBrandIdentity(this HttpContext context)
         {
-            var brokerId = controller.GetBrokerIdentity();
+            var brokerId = context.GetBrokerIdentity();
 
             //todo: extract brand some how
             return new JetBrandIdentity(brokerId.BrokerId, "default-brand");
+        }
+
+        public static IJetClientIdentity GetClientIdByToken(this HttpContext context, string token)
+        {
+            var clientId = token.GetTraderIdByToken();
+
+            var brandId = context.GetBrandIdentity();
+
+            return new JetClientIdentity(brandId.BrokerId, brandId.BrandId, clientId);
         }
     }
 }

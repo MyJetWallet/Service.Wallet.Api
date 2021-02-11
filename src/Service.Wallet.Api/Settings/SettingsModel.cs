@@ -7,5 +7,8 @@ namespace Service.Wallet.Api.Settings
     {
         [YamlProperty("WalletApi.SeqServiceUrl")]
         public string SeqServiceUrl { get; set; }
+
+        [YamlProperty("WalletApi.MyNoSqlReaderHostPort")]
+        public string MyNoSqlReaderHostPort { get; set; }
     }
 }

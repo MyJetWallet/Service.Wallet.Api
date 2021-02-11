@@ -10,18 +10,22 @@ using Microsoft.Extensions.Hosting;
 using Autofac;
 using Microsoft.Extensions.Configuration;
 using MyJetWallet.Sdk.Service;
+using MyNoSqlServer.DataReader;
 using Prometheus;
 using Service.Wallet.Api.Authentication;
 using Service.Wallet.Api.Hubs;
 using Service.Wallet.Api.Middleware;
 using Service.Wallet.Api.Modules;
+using Service.Wallet.Api.Settings;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
+using SimpleTrading.SettingsReader;
 
 namespace Service.Wallet.Api
 {
     public class Startup
     {
+        private MyNoSqlTcpClient _myNoSqlClient;
         private const string SessionEncodingKeyEnv = "SESSION_ENCODING_KEY";
         private const string EnvInfo = "ENV_INFO";
 
@@ -35,6 +39,10 @@ namespace Service.Wallet.Api
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            _myNoSqlClient = new MyNoSqlTcpClient(
+                () => SettingsReader.ReadSettings<SettingsModel>(Program.SettingsFileName).MyNoSqlReaderHostPort,
+                ApplicationEnvironment.HostName ?? $"{ApplicationEnvironment.AppName}:{ApplicationEnvironment.AppVersion}");
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -106,12 +114,15 @@ namespace Service.Wallet.Api
                 endpoints.MapHub<WalletHub>("/signalr");
             });
 
+
+            _myNoSqlClient.Start();
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<ServiceModule>();
+            builder.RegisterModule(new ClientsModule(_myNoSqlClient));
         }
 
         private static IDictionary<string, string> GetEnvVariables()

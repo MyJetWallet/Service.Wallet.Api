@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Service.AssetsDictionary.Domain.Models;
 using Service.Wallet.Api.Controllers.Contracts;
-using Service.Wallet.Api.Controllers.Models;
+using Service.Wallet.Api.Domain.Models;
 
 namespace Service.Wallet.Api.Controllers
 {
@@ -26,7 +24,7 @@ namespace Service.Wallet.Api.Controllers
         {
             if (request == null) throw new WalletApiBadRequestException("request cannot be null");
 
-            var walletId = await this.GetWalletIdentityAsync(request.WalletId);
+            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
 
             //todo: exec create order for walletId
 
@@ -48,7 +46,7 @@ namespace Service.Wallet.Api.Controllers
         {
             if (request == null) throw new WalletApiBadRequestException("request cannot be null");
 
-            var walletId = await this.GetWalletIdentityAsync(request.WalletId);
+            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
 
             //todo: exec create order for walletId
 
@@ -70,7 +68,7 @@ namespace Service.Wallet.Api.Controllers
         {
             if (request == null) throw new WalletApiBadRequestException("request cannot be null");
 
-            var walletId = await this.GetWalletIdentityAsync(request.WalletId);
+            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
 
             //todo: cancel order
 
@@ -84,7 +82,7 @@ namespace Service.Wallet.Api.Controllers
         public async Task<Response<List<LimitOrder>>> GetActiveOrdersAsync([FromRoute] string wallet)
         {
             if (wallet == null) throw new WalletApiBadRequestException("request cannot be null");
-            var walletId = await this.GetWalletIdentityAsync(wallet);
+            var walletId = await HttpContext.GetWalletIdentityAsync(wallet);
 
             //todo: get order from cache if not exist from service
 
@@ -124,10 +122,4 @@ namespace Service.Wallet.Api.Controllers
             return new Response<List<LimitOrder>>(response);
         }
     }
-
-    
-
-
-
-    
 }

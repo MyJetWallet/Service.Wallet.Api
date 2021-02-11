@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Microsoft.AspNetCore.SignalR;
-using Service.Wallet.Api.Controllers;
 
 namespace Service.Wallet.Api.Hubs
 {
@@ -103,39 +101,5 @@ namespace Service.Wallet.Api.Hubs
         {
             return _allConnections;
         }
-    }
-
-    public class HubClientConnection
-    {
-        private readonly HubCallerContext _context;
-
-        public HubClientConnection(HubCallerContext context, IClientProxy client, string token)
-        {
-            _context = context;
-            ClientProxy = client;
-
-            var httpContext = _context.GetHttpContext();
-
-            Ip = httpContext.GetIp();
-
-            UserAgent = httpContext.GetUserAgent();
-
-            //TraderId = httpContext.GetSignalRTraderId(token);
-        }
-
-        // client context for the connection
-        //
-        //public string ActiveAccountId { get; set; }
-        //public string TraderId { get; }
-        //public Dictionary<string, MtInstrumentHubModel> Instruments = new Dictionary<string, MtInstrumentHubModel>();
-        //public Dictionary<string, MtInstrumentGroupHubModel> InstrumentGroups = new Dictionary<string, MtInstrumentGroupHubModel>();
-
-        public string ConnectionId => _context.ConnectionId;
-
-        public string Ip { get; }
-
-        public string UserAgent { get; }
-
-        public IClientProxy ClientProxy { get; }
     }
 }

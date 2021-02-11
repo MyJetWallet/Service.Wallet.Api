@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Service.Wallet.Api</name>
+    </assembly>
+    <members>
+        <member name="T:Service.Wallet.Api.Controllers.Contracts.CreatedOrderResponse">
+            <summary>
+            Description of created order
+            </summary>
+        </member>
+        <member name="P:Service.Wallet.Api.Controllers.Contracts.CreatedOrderResponse.Type">
+            <summary>
+            Order type
+            </summary>
+        </member>
+        <member name="T:Service.Wallet.Api.Controllers.Contracts.CreateLimitOrderRequest">
+            <summary>
+            Request to create limit order
+            </summary>
+        </member>
+        <member name="P:Service.Wallet.Api.Controllers.Contracts.CreateLimitOrderRequest.InstrumentSymbol">
+            <summary>
+            Unique symbol of trading instrument
+            </summary>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.ControllerUtils.PrintToken(System.String)">
+            <summary>
+            PrintToken
+            </summary>
+            <param name="tokenString"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.ControllerUtils.GetIp(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Get Ip of request
+            </summary>
+            <param name="ctx">Request context</param>
+            <returns></returns>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.ControllerUtils.GetUserAgent(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            User agent of request
+            </summary>
+            <param name="ctx"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.ControllerUtils.GetScheme(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Get scheme of request
+            </summary>
+            <param name="ctx"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.ControllerUtils.GetTraderId(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Get trader id of request
+            </summary>
+            <param name="ctx"></param>
+            <returns></returns>
+            <exception cref="T:System.UnauthorizedAccessException">Throws if token is expired, wrong or does not exist</exception>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.ControllerUtils.GetTraderIdByToken(System.String)">
+            <summary>
+            GetTraderIdByToken
+            </summary>
+            <param name="tokenString"></param>
+            <returns></returns>
+            <exception cref="T:System.UnauthorizedAccessException"></exception>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.DebugController.ParseToken(System.String)">
+            <summary>
+            Parse token
+            </summary>
+            <param name="token"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.TradingController.CreateLimitOrderAsync(Service.Wallet.Api.Controllers.Contracts.CreateLimitOrderRequest)">
+            <summary>
+            Create limit order on the wallet
+            </summary>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.TradingController.CreateMarketOrderAsync(Service.Wallet.Api.Controllers.Contracts.CreateMarketOrderRequest)">
+            <summary>
+            Execute fill-or-kill market order
+            </summary>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.TradingController.CancelOrderAsync(Service.Wallet.Api.Controllers.Contracts.CancelOrderRequest)">
+            <summary>
+            Cancel limit order by ID
+            </summary>
+        </member>
+        <member name="M:Service.Wallet.Api.Controllers.TradingController.GetActiveOrdersAsync(System.String)">
+            <summary>
+            Get list of Placed limit orders
+            </summary>
+        </member>
+        <member name="F:Service.Wallet.Api.Hubs.HubNames.Welcome">
+            <summary>
+            Welcome message
+            </summary>
+        </member>
+        <member name="T:Service.Wallet.Api.Hubs.WalletHub">
+            <summary>
+            Signal-R hub to send changes
+            </summary>
+        </member>
+        <member name="P:Service.Wallet.Api.Startup.SessionEncodingKey">
+            <summary>
+            SessionEncodingKey
+            </summary>
+        </member>
+        <member name="M:Service.Wallet.Api.StartupUtils.SetupSwaggerDocumentation(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Setup swagger ui ba
+            </summary>
+            <param name="services"></param>
+        </member>
+        <member name="M:Service.Wallet.Api.StartupUtils.ConfigurateHeaders(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Headers settings
+            </summary>
+            <param name="services"></param>
+        </member>
+        <member name="M:Service.Wallet.Api.StartupUtils.BindDebugMiddleware(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Bind debug middleware
+            </summary>
+            <param name="app"></param>
+        </member>
+    </members>
+</doc>

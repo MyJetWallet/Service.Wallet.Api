@@ -1,4 +1,4 @@
-﻿using Service.Wallet.Api.Controllers.Models;
+﻿using Service.Wallet.Api.Domain.Models;
 
 namespace Service.Wallet.Api.Controllers.Contracts
 {

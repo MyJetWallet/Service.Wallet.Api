@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Service.Wallet.Api.Hubs;
 using Service.Wallet.Api.Hubs.Dto;
 
@@ -35,6 +36,11 @@ namespace TestApp
             connection.On<WelcomeMessage>(HubNames.Welcome, (message) =>
             {
                 Console.WriteLine($"--> [{HubNames.Welcome}] {message.Data}");
+            });
+
+            connection.On<WalletListMessage>(HubNames.WalletList, message =>
+            {
+                Console.WriteLine($"--> [{HubNames.WalletList}] {JsonConvert.SerializeObject(message)}");
             });
 
             

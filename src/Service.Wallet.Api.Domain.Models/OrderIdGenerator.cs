@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Service.Wallet.Api.Controllers.Models
+namespace Service.Wallet.Api.Domain.Models
 {
     public static class OrderIdGenerator
     {

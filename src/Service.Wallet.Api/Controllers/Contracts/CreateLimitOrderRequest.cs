@@ -1,9 +1,15 @@
-﻿using Service.Wallet.Api.Controllers.Models;
+﻿using Service.Wallet.Api.Domain.Models;
 
 namespace Service.Wallet.Api.Controllers.Contracts
 {
+    /// <summary>
+    /// Request to create limit order
+    /// </summary>
     public class CreateLimitOrderRequest : WalletRequest
     {
+        /// <summary>
+        /// Unique symbol of trading instrument
+        /// </summary>
         public string InstrumentSymbol { get; set; }
 
         public Direction Direction { get; set; }
