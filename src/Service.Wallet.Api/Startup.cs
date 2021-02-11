@@ -136,6 +136,7 @@ namespace Service.Wallet.Api
         private static string GetSessionEncodingKey()
         {
             var key = Environment.GetEnvironmentVariable(SessionEncodingKeyEnv);
+            Console.WriteLine(key);
             if (string.IsNullOrEmpty(key))
                 throw new Exception($"Env Variable {SessionEncodingKeyEnv} is not found");
 
