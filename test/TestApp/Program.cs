@@ -16,8 +16,8 @@ namespace TestApp
             Console.ReadLine();
 
             var connection = new HubConnectionBuilder()
-                //.WithUrl("http://localhost:8080/signalr")
-                .WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
+                .WithUrl("http://localhost:8080/signalr")
+                //.WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
                 .AddMessagePackProtocol()
                 .Build();
 
@@ -60,6 +60,14 @@ namespace TestApp
             connection.On<PongMessage>(HubNames.Pong, message =>
             {
                 Console.WriteLine($"--> [{HubNames.Pong}] {JsonConvert.SerializeObject(message)}\r\n");
+            });
+
+            connection.On<BidAskMessage>(HubNames.BidAsk, message =>
+            {
+                foreach (var price in message.Prices)
+                {
+                    Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime.TimeOfDay}\r\n");
+                }
             });
             
             await connection.StartAsync();

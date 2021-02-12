@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Service.MatchingEngine.PriceSource.Client;
 using Service.Wallet.Api.Domain.Assets;
 using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Hubs.Dto;
@@ -17,20 +18,22 @@ namespace Service.Wallet.Api.Hubs
         private readonly IHubManager _hubManager;
         private readonly IAssetService _assetService;
         private readonly IWalletService _walletService;
+        private readonly ICurrentPricesCache _currentPricesCache;
 
-        
-        
+
         public const string AccessTokenParamName = "access_token";
 
         public WalletHub(ILogger<WalletHub> logger,
             IHubManager hubManager,
             IAssetService assetService,
-            IWalletService walletService)
+            IWalletService walletService,
+            ICurrentPricesCache currentPricesCache)
         {
             _logger = logger;
             _hubManager = hubManager;
             _assetService = assetService;
             _walletService = walletService;
+            _currentPricesCache = currentPricesCache;
         }
 
         public override async Task OnConnectedAsync()
@@ -75,7 +78,7 @@ namespace Service.Wallet.Api.Hubs
 
             // todo: Add to trader log SignalR Connection Event
 
-            var ctx = new HubClientConnection(Context, Clients.Caller, token, _assetService, _walletService);
+            var ctx = new HubClientConnection(Context, Clients.Caller, token, _assetService, _walletService, _currentPricesCache);
 
             _hubManager.Connected(ctx);
 
@@ -90,8 +93,9 @@ namespace Service.Wallet.Api.Hubs
             await ctx.SendWalletListAsync();
 
             var defaultWallet = await _walletService.GetDefaultWalletAsync(ctx.ClientId);
-
             await SetWallet(defaultWallet.WalletId);
+
+            await ctx.SendCurrentPrices();
         }
 
         [SignalRIncomingRequest]

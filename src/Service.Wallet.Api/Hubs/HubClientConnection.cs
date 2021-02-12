@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using MyJetWallet.Domain;
+using Service.MatchingEngine.PriceSource.Client;
 using Service.Wallet.Api.Controllers;
 using Service.Wallet.Api.Domain.Assets;
 using Service.Wallet.Api.Domain.Wallets;
@@ -11,17 +12,20 @@ namespace Service.Wallet.Api.Hubs
         private readonly HubCallerContext _context;
         private readonly IAssetService _assetService;
         private readonly IWalletService _walletService;
+        private readonly ICurrentPricesCache _currentPricesCache;
 
         public HubClientConnection(
             HubCallerContext context, 
             IClientProxy client, 
             string token,
             IAssetService assetService,
-            IWalletService walletService)
+            IWalletService walletService,
+            ICurrentPricesCache currentPricesCache)
         {
             _context = context;
             _assetService = assetService;
             _walletService = walletService;
+            _currentPricesCache = currentPricesCache;
             ClientProxy = client;
 
             var httpContext = _context.GetHttpContext();

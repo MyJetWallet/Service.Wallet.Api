@@ -29,6 +29,12 @@ namespace Service.Wallet.Api.Modules
                 .As<IStartable>()
                 .SingleInstance()
                 .AutoActivate();
+
+            builder
+                .RegisterType<PriceChangesNotificator>()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
         }
     }
 }

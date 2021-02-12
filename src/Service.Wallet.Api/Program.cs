@@ -18,6 +18,17 @@ namespace Service.Wallet.Api
 
         public static SettingsModel Settings { get; private set; }
 
+        public static Func<T> ReloadedSettings<T>(Func<SettingsModel, T> getter)
+        {
+            return () =>
+            {
+                var settings = SettingsReader.ReadSettings<SettingsModel>(SettingsFileName);
+                var value = getter.Invoke(settings);
+                return value;
+            };
+        }
+
+
         public static void Main(string[] args)
         {
             Console.Title = "MyJetWallet Service.Wallet.Api";

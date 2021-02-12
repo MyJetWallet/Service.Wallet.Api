@@ -11,6 +11,7 @@ using Autofac;
 using Microsoft.Extensions.Configuration;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.DataReader;
+using MyServiceBus.TcpClient;
 using Prometheus;
 using Service.Wallet.Api.Authentication;
 using Service.Wallet.Api.Hubs;
@@ -26,6 +27,7 @@ namespace Service.Wallet.Api
     public class Startup
     {
         private MyNoSqlTcpClient _myNoSqlClient;
+        private MyServiceBusTcpClient _serviceBusClient;
         private const string SessionEncodingKeyEnv = "SESSION_ENCODING_KEY";
         private const string EnvInfo = "ENV_INFO";
 
@@ -43,6 +45,8 @@ namespace Service.Wallet.Api
             _myNoSqlClient = new MyNoSqlTcpClient(
                 () => SettingsReader.ReadSettings<SettingsModel>(Program.SettingsFileName).MyNoSqlReaderHostPort,
                 ApplicationEnvironment.HostName ?? $"{ApplicationEnvironment.AppName}:{ApplicationEnvironment.AppVersion}");
+
+            _serviceBusClient = new MyServiceBusTcpClient(Program.ReloadedSettings(model => model.SpotServiceBusHostPort), ApplicationEnvironment.HostName);
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -67,7 +71,6 @@ namespace Service.Wallet.Api
                 .AddAuthentication(o => { o.DefaultScheme = "Bearer"; })
                 .AddScheme<WalletAuthenticationOptions, WalletAuthHandler>("Bearer", o => { });
 
-            //services.AddSingleton<WalletAuthHandler>();
 
         }
 
@@ -114,6 +117,7 @@ namespace Service.Wallet.Api
 
 
             _myNoSqlClient.Start();
+            _serviceBusClient.Start();
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
@@ -121,6 +125,7 @@ namespace Service.Wallet.Api
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<ServiceModule>();
             builder.RegisterModule(new ClientsModule(_myNoSqlClient));
+            builder.RegisterModule(new ServiceBusModule(_serviceBusClient));
         }
 
         private static IDictionary<string, string> GetEnvVariables()

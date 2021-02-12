@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using MyJetWallet.Domain;
+using MyJetWallet.Domain.Prices;
 using Service.Wallet.Api.Hubs.Dto;
 
 namespace Service.Wallet.Api.Hubs
@@ -74,6 +77,23 @@ namespace Service.Wallet.Api.Hubs
         public async Task SendPongAsync()
         {
             await SendAsync(HubNames.Pong, new PongMessage());
+        }
+
+        public async Task SendCurrentPrices()
+        {
+            var prices = _currentPricesCache.GetPrices(ClientId.BrokerId);
+
+            await SendPrices(prices);
+        }
+
+        public async Task SendPrices(IEnumerable<BidAsk> prices)
+        {
+            var message = new BidAskMessage()
+            {
+                Prices = prices.Select(BidAskContract.Create)
+            };
+
+            await SendAsync(HubNames.BidAsk, message);
         }
     }
 }

@@ -41,5 +41,10 @@
         /// List of available spot instruments
         /// </summary>
         public const string SpotInstrumentList = "spot-insrument-list";
+
+        /// <summary>
+        /// Price by spot instrument
+        /// </summary>
+        public const string BidAsk = "spot-bidask";
     }
 }

@@ -13,5 +13,8 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.ClientWalletsGrpcServiceUrl")]
         public string ClientWalletsGrpcServiceUrl { get; set; }
+
+        [YamlProperty("WalletApi.SpotServiceBusHostPort")]
+        public string SpotServiceBusHostPort { get; set; }
     }
 }
