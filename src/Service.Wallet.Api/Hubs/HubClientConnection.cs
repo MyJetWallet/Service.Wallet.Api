@@ -33,7 +33,7 @@ namespace Service.Wallet.Api.Hubs
             ClientId = httpContext.GetClientIdByToken(token);
         }
 
-        public void SetWalletId(IJetWalletIdentity walletId)
+        public void SetWalletId(JetWalletIdentity walletId)
         {
             WalletId = walletId;
         }
@@ -53,8 +53,8 @@ namespace Service.Wallet.Api.Hubs
 
         public IClientProxy ClientProxy { get; }
 
-        public IJetClientIdentity ClientId { get; }
+        public JetClientIdentity ClientId { get; }
 
-        public IJetWalletIdentity WalletId { get; private set; }
+        public JetWalletIdentity WalletId { get; private set; }
     }
 }

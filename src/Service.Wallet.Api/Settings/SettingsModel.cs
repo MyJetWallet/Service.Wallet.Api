@@ -10,5 +10,8 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.MyNoSqlReaderHostPort")]
         public string MyNoSqlReaderHostPort { get; set; }
+
+        [YamlProperty("WalletApi.ClientWalletsGrpcServiceUrl")]
+        public string ClientWalletsGrpcServiceUrl { get; set; }
     }
 }

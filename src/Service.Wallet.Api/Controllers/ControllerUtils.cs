@@ -162,7 +162,7 @@ namespace Service.Wallet.Api.Controllers
 
         public const string DefaultBroker = "jetwallet";
 
-        public static IJetClientIdentity GetClientIdentity(this HttpContext context)
+        public static JetClientIdentity GetClientIdentity(this HttpContext context)
         {
             var brandId = context.GetBrandIdentity();
 
@@ -174,7 +174,7 @@ namespace Service.Wallet.Api.Controllers
             return new JetClientIdentity(brandId.BrokerId, brandId.BrandId, traderId);
         }
 
-        public static IJetBrokerIdentity GetBrokerIdentity(this HttpContext context)
+        public static JetBrokerIdentity GetBrokerIdentity(this HttpContext context)
         {
             return new JetBrokerIdentity(){BrokerId = DefaultBroker };
         }
@@ -187,7 +187,7 @@ namespace Service.Wallet.Api.Controllers
             return new JetBrandIdentity(brokerId.BrokerId, "default-brand");
         }
 
-        public static IJetClientIdentity GetClientIdByToken(this HttpContext context, string token)
+        public static JetClientIdentity GetClientIdByToken(this HttpContext context, string token)
         {
             var clientId = token.GetTraderIdByToken();
 

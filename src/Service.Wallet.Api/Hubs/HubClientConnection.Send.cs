@@ -50,7 +50,7 @@ namespace Service.Wallet.Api.Hubs
 
 
 
-        private IJetClientIdentity GetClientId()
+        private JetClientIdentity GetClientId()
         {
             if (ClientId == null)
                 throw new Exception($"SignalR connection ({ConnectionId}) doesn't inited");
@@ -58,7 +58,7 @@ namespace Service.Wallet.Api.Hubs
             return ClientId;
         }
 
-        private IJetWalletIdentity GetWalletId()
+        private JetWalletIdentity GetWalletId()
         {
             if (WalletId == null)
                 throw new Exception($"SignalR connection ({ConnectionId}) doesn't associate with wallet");

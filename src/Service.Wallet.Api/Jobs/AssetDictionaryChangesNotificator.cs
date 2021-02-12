@@ -26,12 +26,14 @@ namespace Service.Wallet.Api.Jobs
 
         private void AssetChanged()
         {
-            _isAssetChanged = true;
+            _hubManager.ExecForeachConnection(async connection => { await connection.SendWalletAssetsAsync(); }).GetAwaiter().GetResult();
+            //_isAssetChanged = true;
         }
 
         private void SpotInstrumentChanged()
         {
-            _isSpotInstrumentChanged = true;
+            _hubManager.ExecForeachConnection(async connection => { await connection.SendWalletSpotInstrumentsAsync(); }).GetAwaiter().GetResult();
+            //_isSpotInstrumentChanged = true;
         }
 
         public void Start()

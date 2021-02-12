@@ -12,6 +12,9 @@ namespace TestApp
     {
         static async Task Main(string[] args)
         {
+            Console.WriteLine("Press enter to start.");
+            Console.ReadLine();
+
             var connection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:8080/signalr")
                 .AddMessagePackProtocol()

@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using MyNoSqlServer.DataReader;
 using Service.AssetsDictionary.Client;
+using Service.ClientWallets.Client;
 
 namespace Service.Wallet.Api.Modules
 {
@@ -16,6 +17,8 @@ namespace Service.Wallet.Api.Modules
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterAssetsDictionaryClients(_myNoSqlClient);
+
+            builder.RegisterClientWalletsClients(_myNoSqlClient, Program.Settings.ClientWalletsGrpcServiceUrl);
         }
     }
 }
