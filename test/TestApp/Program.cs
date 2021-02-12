@@ -16,7 +16,8 @@ namespace TestApp
             Console.ReadLine();
 
             var connection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:8080/signalr")
+                //.WithUrl("http://localhost:8080/signalr")
+                .WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
                 .AddMessagePackProtocol()
                 .Build();
 
