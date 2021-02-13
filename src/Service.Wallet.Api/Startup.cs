@@ -26,8 +26,8 @@ namespace Service.Wallet.Api
 {
     public class Startup
     {
-        private MyNoSqlTcpClient _myNoSqlClient;
-        private MyServiceBusTcpClient _serviceBusClient;
+        private readonly MyNoSqlTcpClient _myNoSqlClient;
+        private readonly MyServiceBusTcpClient _serviceBusClient;
         private const string SessionEncodingKeyEnv = "SESSION_ENCODING_KEY";
         private const string EnvInfo = "ENV_INFO";
 

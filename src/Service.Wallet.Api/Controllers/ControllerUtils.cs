@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyJetWallet.Domain;
 using Newtonsoft.Json;
+using Service.Wallet.Api.Authentication;
 using Service.Wallet.Api.Controllers.Contracts;
 using SimpleTrading.TokensManager;
 using SimpleTrading.TokensManager.Tokens;
@@ -164,36 +166,23 @@ namespace Service.Wallet.Api.Controllers
 
         public static JetClientIdentity GetClientIdentity(this HttpContext context)
         {
-            var brandId = context.GetBrandIdentity();
+            var clientIdClaim = context?.User?.Claims.FirstOrDefault(e => e.Type == WalletAuthHandler.ClientIdClaim);
 
-            var traderId = context?.User?.Identity?.Name;
-
-            if (string.IsNullOrEmpty(traderId))
+            if (string.IsNullOrEmpty(clientIdClaim?.Value))
+            {
                 throw new WalletApiBadRequestException("Cannot extract user from request context.");
+            }
 
-            return new JetClientIdentity(brandId.BrokerId, brandId.BrandId, traderId);
-        }
+            var clientId = JsonConvert.DeserializeObject<JetClientIdentity>(clientIdClaim.Value);
 
-        public static JetBrokerIdentity GetBrokerIdentity(this HttpContext context)
-        {
-            return new JetBrokerIdentity(){BrokerId = DefaultBroker };
-        }
-
-        public static IJetBrandIdentity GetBrandIdentity(this HttpContext context)
-        {
-            var brokerId = context.GetBrokerIdentity();
-
-            //todo: extract brand some how
-            return new JetBrandIdentity(brokerId.BrokerId, "default-brand");
+            return clientId;
         }
 
         public static JetClientIdentity GetClientIdByToken(this HttpContext context, string token)
         {
             var clientId = token.GetTraderIdByToken();
 
-            var brandId = context.GetBrandIdentity();
-
-            return new JetClientIdentity(brandId.BrokerId, brandId.BrandId, clientId);
+            return new JetClientIdentity(WalletAuthHandler.DefaultBroker, WalletAuthHandler.DefaultBrand, clientId);
         }
     }
 }
