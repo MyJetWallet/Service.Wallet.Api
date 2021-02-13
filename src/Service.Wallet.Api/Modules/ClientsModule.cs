@@ -3,6 +3,7 @@ using MyNoSqlServer.DataReader;
 using Service.AssetsDictionary.Client;
 using Service.ClientWallets.Client;
 using Service.MatchingEngine.PriceSource.Client;
+using Service.Registration.Client;
 
 namespace Service.Wallet.Api.Modules
 {
@@ -22,6 +23,8 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterClientWalletsClients(_myNoSqlClient, Program.Settings.ClientWalletsGrpcServiceUrl);
 
             builder.RegisterMatchingEnginePriceSourceClient(_myNoSqlClient);
+
+            builder.RegisterClientRegistrationClient(_myNoSqlClient, Program.Settings.RegistrationGrpcServiceUrl);
         }
     }
 }
