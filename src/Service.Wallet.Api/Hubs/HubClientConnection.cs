@@ -16,8 +16,8 @@ namespace Service.Wallet.Api.Hubs
 
         public HubClientConnection(
             HubCallerContext context, 
-            IClientProxy client, 
-            string token,
+            IClientProxy client,
+            JetClientIdentity clientId,
             IAssetService assetService,
             IWalletService walletService,
             ICurrentPricesCache currentPricesCache)
@@ -34,7 +34,7 @@ namespace Service.Wallet.Api.Hubs
 
             UserAgent = httpContext.GetUserAgent();
 
-            ClientId = httpContext.GetClientIdByToken(token);
+            ClientId = clientId;
         }
 
         public void SetWalletId(JetWalletIdentity walletId)

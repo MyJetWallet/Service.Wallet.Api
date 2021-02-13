@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Service.MatchingEngine.PriceSource.Client;
+using Service.Registration.Grpc;
+using Service.Registration.Grpc.Models;
+using Service.Wallet.Api.Controllers;
 using Service.Wallet.Api.Domain.Assets;
 using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Hubs.Dto;
@@ -19,6 +22,7 @@ namespace Service.Wallet.Api.Hubs
         private readonly IAssetService _assetService;
         private readonly IWalletService _walletService;
         private readonly ICurrentPricesCache _currentPricesCache;
+        private readonly IClientRegistrationService _clientRegistrationService;
 
 
         public const string AccessTokenParamName = "access_token";
@@ -27,13 +31,15 @@ namespace Service.Wallet.Api.Hubs
             IHubManager hubManager,
             IAssetService assetService,
             IWalletService walletService,
-            ICurrentPricesCache currentPricesCache)
+            ICurrentPricesCache currentPricesCache,
+            IClientRegistrationService clientRegistrationService)
         {
             _logger = logger;
             _hubManager = hubManager;
             _assetService = assetService;
             _walletService = walletService;
             _currentPricesCache = currentPricesCache;
+            _clientRegistrationService = clientRegistrationService;
         }
 
         public override async Task OnConnectedAsync()
@@ -78,7 +84,17 @@ namespace Service.Wallet.Api.Hubs
 
             // todo: Add to trader log SignalR Connection Event
 
-            var ctx = new HubClientConnection(Context, Clients.Caller, token, _assetService, _walletService, _currentPricesCache);
+            var httpContext = Context.GetHttpContext();
+            var clientId = httpContext.GetClientIdByToken(token);
+            var response = await _clientRegistrationService.GetOrRegisterClientAsync(clientId);
+            if (response.Result != ClientRegistrationResponse.RegistrationResult.Ok)
+            {
+                _logger.LogError("[HUB] Cannot register client. Client already register with another brand. BrokerId/BrandId/ClientId: {brokerId}/{brandId}/{clientId}",
+                    clientId.BrokerId, clientId.BrandId, clientId.ClientId);
+                return;
+            }
+
+            var ctx = new HubClientConnection(Context, Clients.Caller, clientId, _assetService, _walletService, _currentPricesCache);
 
             _hubManager.Connected(ctx);
 
