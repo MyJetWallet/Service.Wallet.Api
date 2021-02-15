@@ -15,10 +15,10 @@ namespace Service.Wallet.Api.Hubs.Dto
         public DateTime DateTime { get; set; }
 
         [Key("B")]
-        public decimal Bid { get; set; }
+        public double Bid { get; set; }
 
         [Key("A")]
-        public decimal Ask { get; set; }
+        public double Ask { get; set; }
         
         public static BidAskContract Create(BidAsk price)
         {
