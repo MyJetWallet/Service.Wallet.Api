@@ -19,5 +19,8 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.RegistrationGrpcServiceUrl")]
         public string RegistrationGrpcServiceUrl { get; set; }
+
+        [YamlProperty("WalletApi.MatchingEngine.TradingGrpcServiceUrl")]
+        public string MatchingEngineTradingGrpcServiceUrl { get; set; }
     }
 }

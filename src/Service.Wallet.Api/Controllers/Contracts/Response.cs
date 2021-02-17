@@ -1,4 +1,6 @@
-﻿namespace Service.Wallet.Api.Controllers.Contracts
+﻿using Service.Wallet.Api.Domain.Contracts;
+
+namespace Service.Wallet.Api.Controllers.Contracts
 {
     public class Response
     {

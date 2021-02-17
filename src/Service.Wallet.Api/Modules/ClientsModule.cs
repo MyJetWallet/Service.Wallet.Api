@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using MyJetWallet.MatchingEngine.Grpc;
 using MyNoSqlServer.DataReader;
 using Service.AssetsDictionary.Client;
 using Service.ClientWallets.Client;
@@ -25,6 +26,8 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterMatchingEnginePriceSourceClient(_myNoSqlClient);
 
             builder.RegisterClientRegistrationClient(_myNoSqlClient, Program.Settings.RegistrationGrpcServiceUrl);
+
+            builder.RegisterMatchingEngineGrpcClient(tradingServiceGrpcUrl: Program.Settings.MatchingEngineTradingGrpcServiceUrl);
         }
     }
 }

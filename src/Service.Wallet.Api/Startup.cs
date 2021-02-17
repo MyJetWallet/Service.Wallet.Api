@@ -70,8 +70,6 @@ namespace Service.Wallet.Api
             services
                 .AddAuthentication(o => { o.DefaultScheme = "Bearer"; })
                 .AddScheme<WalletAuthenticationOptions, WalletAuthHandler>("Bearer", o => { });
-
-
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

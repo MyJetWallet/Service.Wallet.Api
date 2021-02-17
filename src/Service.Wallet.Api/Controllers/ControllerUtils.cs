@@ -7,6 +7,7 @@ using MyJetWallet.Domain;
 using Newtonsoft.Json;
 using Service.Wallet.Api.Authentication;
 using Service.Wallet.Api.Controllers.Contracts;
+using Service.Wallet.Api.Domain.Contracts;
 using SimpleTrading.TokensManager;
 using SimpleTrading.TokensManager.Tokens;
 

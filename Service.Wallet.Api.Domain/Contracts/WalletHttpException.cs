@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace Service.Wallet.Api.Controllers.Contracts
+namespace Service.Wallet.Api.Domain.Contracts
 {
     public class WalletApiHttpException: Exception
     {
