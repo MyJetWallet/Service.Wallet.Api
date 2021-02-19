@@ -41,6 +41,12 @@ namespace Service.Wallet.Api.Modules
                 .RegisterType<OrderService>()
                 .As<IOrderService>()
                 .SingleInstance();
+
+            builder
+                .RegisterType<BalancesNotificator>()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
         }
     }
 }

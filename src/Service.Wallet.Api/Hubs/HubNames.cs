@@ -46,5 +46,10 @@
         /// Price by spot instrument
         /// </summary>
         public const string BidAsk = "spot-bidask";
+
+        /// <summary>
+        /// Balances by spot wallet
+        /// </summary>
+        public const string WalletBalances = "spot-wallet-balances";
     }
 }

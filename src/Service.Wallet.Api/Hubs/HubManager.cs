@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Service.Wallet.Api.Hubs
@@ -12,6 +13,8 @@ namespace Service.Wallet.Api.Hubs
         IReadOnlyList<HubClientConnection> GetAllConnections();
 
         Task ExecForeachConnection(Func<HubClientConnection, Task> func);
+
+        IEnumerable<HubClientConnection> TryGetContextByWalletId(string walletId);
     }
 
     public class HubManager: IHubManager
@@ -45,6 +48,13 @@ namespace Service.Wallet.Api.Hubs
             {
                 await func.Invoke(connection);
             }
+        }
+
+        public IEnumerable<HubClientConnection> TryGetContextByWalletId(string walletId)
+        {
+            //todo: need to optimize, add dictionary by wallet id
+            var data = _hubConnections.GetByCondition(e => e?.WalletId.WalletId == walletId);
+            return data;
         }
     }
 }

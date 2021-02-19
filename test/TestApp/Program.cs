@@ -16,8 +16,8 @@ namespace TestApp
             Console.ReadLine();
 
             var connection = new HubConnectionBuilder()
-                //.WithUrl("http://localhost:8080/signalr")
-                .WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
+                .WithUrl("http://localhost:8080/signalr")
+                //.WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
                 .AddMessagePackProtocol()
                 .Build();
 
@@ -62,14 +62,24 @@ namespace TestApp
                 Console.WriteLine($"--> [{HubNames.Pong}] {JsonConvert.SerializeObject(message)}\r\n");
             });
 
-            connection.On<BidAskMessage>(HubNames.BidAsk, message =>
+            //connection.On<BidAskMessage>(HubNames.BidAsk, message =>
+            //{
+            //    foreach (var price in message.Prices)
+            //    {
+            //        Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime.TimeOfDay}\r\n");
+            //    }
+            //});
+
+            connection.On<WalletBalancesMessage>(HubNames.WalletBalances, message =>
             {
-                foreach (var price in message.Prices)
+                Console.WriteLine("Balances: ");
+                foreach (var asset in message.Balances)
                 {
-                    Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime.TimeOfDay}\r\n");
+                    Console.WriteLine($"  * {asset.AssetId}: {asset.Balance - asset.Reserve} ({asset.Reserve})");
                 }
             });
-            
+
+
             await connection.StartAsync();
 
             await connection.SendAsync(HubNames.Init, "alex");

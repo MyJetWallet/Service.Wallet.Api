@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using MyJetWallet.Domain;
 using MyJetWallet.Domain.Prices;
+using Service.Balances.Domain.Models;
+using Service.Balances.Grpc;
 using Service.Wallet.Api.Hubs.Dto;
 
 namespace Service.Wallet.Api.Hubs
@@ -49,10 +51,7 @@ namespace Service.Wallet.Api.Hubs
 
             await SendAsync(HubNames.SpotInstrumentList, message);
         }
-
-
-
-
+        
         private JetClientIdentity GetClientId()
         {
             if (ClientId == null)
@@ -94,6 +93,19 @@ namespace Service.Wallet.Api.Hubs
             };
 
             await SendAsync(HubNames.BidAsk, message);
+        }
+
+        public async Task SendWalletBalancesAsync()
+        {
+            var data = await _balanceService.GetBalancesByWallet(WalletId.WalletId);
+
+            var message = new WalletBalancesMessage()
+            {
+                Balances = data ?? new List<WalletBalance>()
+            };
+
+            await SendAsync(HubNames.WalletBalances, message);
+
         }
     }
 }
