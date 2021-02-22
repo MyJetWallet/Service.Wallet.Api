@@ -1,4 +1,5 @@
-﻿using Service.Wallet.Api.Domain.Models;
+﻿using MyJetWallet.Domain.Orders;
+using Service.Wallet.Api.Domain.Models;
 
 namespace Service.Wallet.Api.Controllers.Contracts
 {
@@ -12,10 +13,10 @@ namespace Service.Wallet.Api.Controllers.Contracts
         /// </summary>
         public string InstrumentSymbol { get; set; }
 
-        public Direction Direction { get; set; }
+        public OrderSide Side { get; set; }
 
-        public decimal Price { get; set; }
+        public double Price { get; set; }
 
-        public decimal Volume { get; set; }
+        public double Volume { get; set; }
     }
 }

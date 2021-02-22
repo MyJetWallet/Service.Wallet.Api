@@ -1,4 +1,5 @@
 ﻿using System;
+using MyJetWallet.Domain.Orders;
 
 namespace Service.Wallet.Api.Domain.Models
 {
@@ -16,7 +17,7 @@ namespace Service.Wallet.Api.Domain.Models
 
         public decimal QuoteVolume { get; set; }
 
-        public Direction Direction { get; set; }
+        public OrderSide Side { get; set; }
 
         public DateTime Timestamp { get; set; }
 

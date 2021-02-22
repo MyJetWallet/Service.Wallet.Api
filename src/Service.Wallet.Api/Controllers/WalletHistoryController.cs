@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyJetWallet.Domain.Orders;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Models;
 
@@ -80,7 +81,7 @@ namespace Service.Wallet.Api.Controllers
                 {
                     TradeId = Guid.NewGuid().ToString("N"),
                     OrderId = OrderIdGenerator.Generate(),
-                    Direction = Direction.Buy,
+                    Side = OrderSide.Buy,
                     Type = OrderType.Market,
                     Price = 300.33m,
                     WalletId = wallet,

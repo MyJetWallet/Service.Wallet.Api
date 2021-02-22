@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using ME.Contracts.Api.IncomingMessages;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
+using MyJetWallet.Domain.Orders;
 using MyJetWallet.MatchingEngine.Grpc.Api;
 using Service.Wallet.Api.Domain.Contracts;
 using Service.Wallet.Api.Domain.Models;
@@ -12,8 +13,8 @@ namespace Service.Wallet.Api.Domain.Orders
 {
     public interface IOrderService
     {
-        ValueTask<string> CreateLimitOrderAsync(IJetWalletIdentity walletId, string symbol, decimal price, decimal volume, Direction direction);
-        Task<(string, decimal)> CreateMarketOrderAsync(IJetWalletIdentity walletId, string symbol, decimal volume, Direction direction);
+        ValueTask<string> CreateLimitOrderAsync(IJetWalletIdentity walletId, string symbol, double price, double volume, OrderSide side);
+        Task<(string, double)> CreateMarketOrderAsync(IJetWalletIdentity walletId, string symbol, double volume, OrderSide side);
         Task CancelOrderAsync(IJetWalletIdentity walletId, string orderId);
     }
 
@@ -29,12 +30,12 @@ namespace Service.Wallet.Api.Domain.Orders
         }
 
 
-        public async ValueTask<string> CreateLimitOrderAsync(IJetWalletIdentity walletId, string symbol, decimal price, decimal volume,
-            Direction direction)
+        public async ValueTask<string> CreateLimitOrderAsync(IJetWalletIdentity walletId, string symbol, double price, double volume,
+            OrderSide side)
         {
             //todo: add order parameter logical validations
 
-            var volumeSign = direction == Direction.Buy ? volume : -volume;
+            var volumeSign = side == OrderSide.Buy ? volume : -volume;
 
             var order = new ME.Contracts.Api.IncomingMessages.LimitOrder()
             {
@@ -65,11 +66,11 @@ namespace Service.Wallet.Api.Domain.Orders
             return order.Id;
         }
 
-        public async Task<(string, decimal)> CreateMarketOrderAsync(IJetWalletIdentity walletId, string symbol, decimal volume, Direction direction)
+        public async Task<(string, double)> CreateMarketOrderAsync(IJetWalletIdentity walletId, string symbol, double volume, OrderSide side)
         {
             //todo: add order parameter logical validations
 
-            var volumeSign = direction == Direction.Buy ? volume : -volume;
+            var volumeSign = side == OrderSide.Buy ? volume : -volume;
 
             var order = new ME.Contracts.Api.IncomingMessages.MarketOrder()
             {
@@ -95,7 +96,7 @@ namespace Service.Wallet.Api.Domain.Orders
                     ApiResponseCodes.InternalServerError);
             }
 
-            return (order.Id, decimal.Parse(resp.Price));
+            return (order.Id, double.Parse(resp.Price));
         }
 
         public async Task CancelOrderAsync(IJetWalletIdentity walletId, string orderId)

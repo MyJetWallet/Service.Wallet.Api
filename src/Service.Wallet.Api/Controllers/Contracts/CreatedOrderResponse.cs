@@ -1,4 +1,4 @@
-﻿using Service.Wallet.Api.Domain.Models;
+﻿using MyJetWallet.Domain.Orders;
 
 namespace Service.Wallet.Api.Controllers.Contracts
 {
@@ -8,6 +8,6 @@ namespace Service.Wallet.Api.Controllers.Contracts
 
         public string OrderId { get; set; }
 
-        public decimal OrderPrice { get; set; }
+        public double OrderPrice { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.Domain.Orders;
 using MyJetWallet.MatchingEngine.Grpc.Api;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
@@ -40,7 +41,7 @@ namespace Service.Wallet.Api.Controllers
 
             var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
 
-            var orderId = await _orderService.CreateLimitOrderAsync(walletId, request.InstrumentSymbol, request.Price, request.Volume, request.Direction);
+            var orderId = await _orderService.CreateLimitOrderAsync(walletId, request.InstrumentSymbol, request.Price, request.Volume, request.Side);
 
             var response = new CreatedOrderResponse()
             {
@@ -66,7 +67,7 @@ namespace Service.Wallet.Api.Controllers
 
             //todo: exec create order for walletId
 
-            (string orderId, decimal price) = await _orderService.CreateMarketOrderAsync(walletId, request.InstrumentSymbol, request.Volume, request.Direction);
+            (string orderId, double price) = await _orderService.CreateMarketOrderAsync(walletId, request.InstrumentSymbol, request.Volume, request.Side);
 
             var response = new CreatedOrderResponse()
             {
@@ -99,23 +100,22 @@ namespace Service.Wallet.Api.Controllers
         /// Get list of Placed limit orders
         /// </summary>
         [HttpGet("order-list/{wallet}")]
-        public async Task<Response<List<LimitOrder>>> GetActiveOrdersAsync([FromRoute] string wallet)
+        public async Task<Response<List<SpotOrder>>> GetActiveOrdersAsync([FromRoute] string wallet)
         {
             if (wallet == null) throw new WalletApiBadRequestException("request cannot be null");
             var walletId = await HttpContext.GetWalletIdentityAsync(wallet);
 
             //todo: get order from cache if not exist from service
 
-            var response = new List<LimitOrder>()
+            var response = new List<SpotOrder>()
             {
-                new LimitOrder()
+                new SpotOrder()
                 {
-                    WalletId = walletId.WalletId,
                     OrderId = OrderIdGenerator.Generate(),
-                    Price = 200.34m,
-                    Direction = Direction.Buy,
-                    Volume = 0.45m,
-                    FilledVolume = 0.1m,
+                    Price = 200.34,
+                    Side = OrderSide.Buy,
+                    Volume = 0.45,
+                    RemainingVolume = 0.1,
                     InstrumentSymbol = "BTCUSD",
                     CreatedTime = DateTime.UtcNow.AddHours(-1),
                     LastUpdate = DateTime.UtcNow.AddMinutes(-10),
@@ -123,14 +123,13 @@ namespace Service.Wallet.Api.Controllers
                     Type = OrderType.Limit
                 },
 
-                new LimitOrder()
+                new SpotOrder()
                 {
-                    WalletId = walletId.WalletId,
                     OrderId = OrderIdGenerator.Generate(),
-                    Price = 200.34m,
-                    Direction = Direction.Sell,
-                    Volume = 2m,
-                    FilledVolume = 0m,
+                    Price = 200.34,
+                    Side = OrderSide.Sell,
+                    Volume = 2.0,
+                    RemainingVolume = 0,
                     InstrumentSymbol = "ETHUSD",
                     CreatedTime = DateTime.UtcNow.AddHours(-1),
                     LastUpdate = DateTime.UtcNow.AddMinutes(-10),
@@ -139,7 +138,7 @@ namespace Service.Wallet.Api.Controllers
                 }
             };
 
-            return new Response<List<LimitOrder>>(response);
+            return new Response<List<SpotOrder>>(response);
         }
     }
 }
