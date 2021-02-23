@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Service.ActiveOrders.Grpc;
 using Service.Balances.Grpc;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Registration.Grpc;
@@ -25,6 +26,7 @@ namespace Service.Wallet.Api.Hubs
         private readonly ICurrentPricesCache _currentPricesCache;
         private readonly IClientRegistrationService _clientRegistrationService;
         private readonly IWalletBalanceService _balanceService;
+        private readonly IActiveOrderService _orderService;
 
 
         public const string AccessTokenParamName = "access_token";
@@ -35,7 +37,8 @@ namespace Service.Wallet.Api.Hubs
             IWalletService walletService,
             ICurrentPricesCache currentPricesCache,
             IClientRegistrationService clientRegistrationService,
-            IWalletBalanceService balanceService)
+            IWalletBalanceService balanceService,
+            IActiveOrderService orderService)
         {
             _logger = logger;
             _hubManager = hubManager;
@@ -44,6 +47,7 @@ namespace Service.Wallet.Api.Hubs
             _currentPricesCache = currentPricesCache;
             _clientRegistrationService = clientRegistrationService;
             _balanceService = balanceService;
+            _orderService = orderService;
         }
 
         public override async Task OnConnectedAsync()
@@ -98,7 +102,7 @@ namespace Service.Wallet.Api.Hubs
                 return;
             }
 
-            var ctx = new HubClientConnection(Context, Clients.Caller, clientId, _assetService, _walletService, _currentPricesCache, _balanceService);
+            var ctx = new HubClientConnection(Context, Clients.Caller, clientId, _assetService, _walletService, _currentPricesCache, _balanceService, _orderService);
 
             _hubManager.Connected(ctx);
 
@@ -150,6 +154,7 @@ namespace Service.Wallet.Api.Hubs
             await ctx.SendWalletAssetsAsync();
             await ctx.SendWalletSpotInstrumentsAsync();
             await ctx.SendWalletBalancesAsync();
+            await ctx.SendActiveOrdersAsync();
         }
 
         public async Task Ping()

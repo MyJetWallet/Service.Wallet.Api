@@ -25,5 +25,8 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.BalancesGrpcServiceUrl")]
         public string BalancesGrpcServiceUrl { get; set; }
+
+        [YamlProperty("WalletApi.ActiveOrdersGrpcServiceUrl")]
+        public string ActiveOrdersGrpcServiceUrl { get; set; }
     }
 }

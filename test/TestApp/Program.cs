@@ -16,8 +16,8 @@ namespace TestApp
             Console.ReadLine();
 
             var connection = new HubConnectionBuilder()
-                //.WithUrl("http://localhost:8080/signalr")
-                .WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
+                .WithUrl("http://localhost:8080/signalr")
+                //.WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
                 .AddMessagePackProtocol()
                 .Build();
 
@@ -59,7 +59,7 @@ namespace TestApp
 
             connection.On<PongMessage>(HubNames.Pong, message =>
             {
-                Console.WriteLine($"--> [{HubNames.Pong}] {JsonConvert.SerializeObject(message)}\r\n");
+                //Console.WriteLine($"--> [{HubNames.Pong}] {JsonConvert.SerializeObject(message)}\r\n");
             });
 
             //connection.On<BidAskMessage>(HubNames.BidAsk, message =>
@@ -70,19 +70,28 @@ namespace TestApp
             //    }
             //});
 
+            connection.On<ActiveOrdersMessage>(HubNames.ActiveOrders, message =>
+            {
+                Console.WriteLine($"Active orders:");
+                foreach (var order in message.Orders)
+                {
+                    Console.WriteLine($"  * {order.OrderId} {order.InstrumentSymbol}; P:{order.Price} V:{order.Volume}[{order.RemainingVolume}]");
+                }
+            });
+
             connection.On<WalletBalancesMessage>(HubNames.WalletBalances, message =>
             {
                 Console.WriteLine("Balances: ");
                 foreach (var asset in message.Balances)
                 {
-                    Console.WriteLine($"  * {asset.AssetId}: {asset.Balance - asset.Reserve} ({asset.Reserve})");
+                    Console.WriteLine($"  * {asset.AssetId}: {Math.Round(asset.Balance - asset.Reserve, 10)} ({asset.Reserve})");
                 }
             });
 
 
             await connection.StartAsync();
 
-            await connection.SendAsync(HubNames.Init, "alex");
+            await connection.SendAsync(HubNames.Init, "test");
 
             var run = true;
 

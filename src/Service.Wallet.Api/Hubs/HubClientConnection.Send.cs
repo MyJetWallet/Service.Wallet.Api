@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using MyJetWallet.Domain;
+using MyJetWallet.Domain.Orders;
 using MyJetWallet.Domain.Prices;
+using Service.ActiveOrders.Grpc.Models;
 using Service.Balances.Domain.Models;
 using Service.Balances.Grpc;
 using Service.Wallet.Api.Hubs.Dto;
@@ -106,6 +108,21 @@ namespace Service.Wallet.Api.Hubs
 
             await SendAsync(HubNames.WalletBalances, message);
 
+        }
+
+        public async Task SendActiveOrdersAsync()
+        {
+            var data = await _activeOrderService.GetActiveOrdersAsync(new GetActiveOrdersRequest()
+            {
+                WalletId = WalletId.WalletId
+            });
+
+            var message = new ActiveOrdersMessage()
+            {
+                Orders = data?.Orders ?? new List<SpotOrder>()
+            };
+
+            await SendAsync(HubNames.ActiveOrders, message);
         }
     }
 }

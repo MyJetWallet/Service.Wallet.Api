@@ -51,5 +51,10 @@
         /// Balances by spot wallet
         /// </summary>
         public const string WalletBalances = "spot-wallet-balances";
+
+        /// <summary>
+        /// Active orders by spot wallet
+        /// </summary>
+        public const string ActiveOrders = "spot-active-orders";
     }
 }

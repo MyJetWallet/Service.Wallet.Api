@@ -44,7 +44,13 @@ namespace Service.Wallet.Api.Modules
 
             builder
                 .RegisterType<BalancesNotificator>()
-                .As<IStartable>()
+                .AsSelf()
+                .AutoActivate()
+                .SingleInstance();
+
+            builder
+                .RegisterType<ActiveOrderNotificator>()
+                .AsSelf()
                 .AutoActivate()
                 .SingleInstance();
         }
