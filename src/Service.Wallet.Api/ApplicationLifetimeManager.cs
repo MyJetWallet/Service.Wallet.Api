@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
 using Service.Registration.Grpc;
+using Service.Wallet.Api.Controllers;
+using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Jobs;
 
 namespace Service.Wallet.Api
@@ -16,13 +18,17 @@ namespace Service.Wallet.Api
         public ApplicationLifetimeManager(IHostApplicationLifetime appLifetime, ILogger<ApplicationLifetimeManager> logger,
             ActiveOrderNotificator activeOrderNotificator,
             BalancesNotificator balancesNotificator,
-            TradeNotificator tradeNotificator)
+            TradeNotificator tradeNotificator,
+            IWalletService walletService)
             : base(appLifetime)
         {
             _logger = logger;
             _activeOrderNotificator = activeOrderNotificator;
             _balancesNotificator = balancesNotificator;
             _tradeNotificator = tradeNotificator;
+
+            // init static locator to implement helper - Get wallet
+            ControllerUtils.WalletService = walletService;
         }
 
         protected override void OnStarted()

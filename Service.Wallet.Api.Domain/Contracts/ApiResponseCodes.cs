@@ -6,6 +6,7 @@ namespace Service.Wallet.Api.Domain.Contracts
     public enum ApiResponseCodes
     {
         OK = 0,
-        InternalServerError = 1
+        InternalServerError = 1,
+        WalletDoNotExist = 2
     }
 }

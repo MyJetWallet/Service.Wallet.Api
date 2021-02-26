@@ -21,7 +21,7 @@
     <PackageReference Include="MyJetWallet.Domain" Version="1.0.19" />
     <PackageReference Include="MyJetWallet.Domain.ServiceBus" Version="1.0.4" />
     <PackageReference Include="MyJetWallet.MatchingEngine.Grpc" Version="1.0.1" />
-    <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.0.7" />
+    <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.0.8" />
     <PackageReference Include="MyJetWallet.Service.ActiveOrders.Client" Version="1.0.2" />
     <PackageReference Include="MyJetWallet.Service.Balances.Client" Version="1.0.5" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.PriceSource.Client" Version="1.0.0" />

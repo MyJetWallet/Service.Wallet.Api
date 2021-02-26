@@ -2,12 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using MyJetWallet.Domain;
 using Newtonsoft.Json;
 using Service.Wallet.Api.Authentication;
-using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
+using Service.Wallet.Api.Domain.Wallets;
 using SimpleTrading.TokensManager;
 using SimpleTrading.TokensManager.Tokens;
 
@@ -15,6 +14,8 @@ namespace Service.Wallet.Api.Controllers
 {
     public static class ControllerUtils
     {
+        public static IWalletService WalletService { get; set; }
+
         /// <summary>
         /// PrintToken
         /// </summary>
@@ -51,7 +52,7 @@ namespace Service.Wallet.Api.Controllers
                     return httpRequest.Headers[ipHeader].ToString();
             }
 
-            return httpRequest.HttpContext.Connection.RemoteIpAddress.ToString();
+            return httpRequest?.HttpContext.Connection.RemoteIpAddress?.ToString();
         }
 
         /// <summary>
@@ -122,6 +123,7 @@ namespace Service.Wallet.Api.Controllers
         /// <exception cref="UnauthorizedAccessException"></exception>
         public static string GetTraderIdByToken(this string tokenString)
         {
+            //todo: add authorization by token
             try
             {
                 //var (result, token) = TokensManager.TokensManager.ParseBase64Token<AuthorizationToken>(tokenString, ServiceLocator.SessionEncodingKey, DateTime.UtcNow);
@@ -150,17 +152,19 @@ namespace Service.Wallet.Api.Controllers
             return context.GetWalletIdentityAsync(walletId, clientId);
         }
 
-        public static ValueTask<IJetWalletIdentity> GetWalletIdentityAsync(this HttpContext context, string walletId, IJetClientIdentity clientId)
+        private static async ValueTask<IJetWalletIdentity> GetWalletIdentityAsync(this HttpContext context, string walletId, JetClientIdentity clientId)
         {
             if (string.IsNullOrEmpty(walletId))
                 throw new WalletApiBadRequestException("Wallet cannot be empty");
 
-            //todo: get wallet from nosql, If not found call to wallet service to get or create
-            //todo: if in wallet list wallet id do not exist then return error
+            var wallet = await WalletService.GetWalletIdentityByIdAsync(clientId, walletId);
 
-            return new ValueTask<IJetWalletIdentity>(
-                new JetWalletIdentity(clientId.BrokerId, clientId.BrandId, clientId.ClientId, walletId)
-            );
+            if (wallet == null)
+            {
+                throw new WalletApiErrorException("Wallet do not found", ApiResponseCodes.WalletDoNotExist);
+            }
+
+            return wallet;
         }
 
         public const string DefaultBroker = "jetwallet";
