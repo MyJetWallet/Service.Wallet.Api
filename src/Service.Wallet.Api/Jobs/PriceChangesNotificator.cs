@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain.Prices;
+using MyServiceBus.TcpContracts;
+using Service.TradeHistory.Domain.Models;
 using Service.Wallet.Api.Hubs;
 
 namespace Service.Wallet.Api.Jobs
 {
     public class PriceChangesNotificator : IStartable, IDisposable
     {
-
         public const int TimeoutMs = 500;
 
         private readonly IHubManager _hubManager;

@@ -56,5 +56,10 @@
         /// Active orders by spot wallet
         /// </summary>
         public const string ActiveOrders = "spot-active-orders";
+        
+        /// <summary>
+        /// Trades by spot wallet
+        /// </summary>
+        public const string Trades = "spot-trades";
     }
 }

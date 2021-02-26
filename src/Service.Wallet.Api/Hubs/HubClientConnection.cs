@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
 using Service.ActiveOrders.Grpc;
 using Service.Balances.Grpc;
@@ -17,6 +18,7 @@ namespace Service.Wallet.Api.Hubs
         private readonly ICurrentPricesCache _currentPricesCache;
         private readonly IWalletBalanceService _balanceService;
         private readonly IActiveOrderService _activeOrderService;
+        private readonly ILogger _logger;
 
         public HubClientConnection(HubCallerContext context,
             IClientProxy client,
@@ -25,7 +27,8 @@ namespace Service.Wallet.Api.Hubs
             IWalletService walletService,
             ICurrentPricesCache currentPricesCache,
             IWalletBalanceService balanceService, 
-            IActiveOrderService activeOrderService)
+            IActiveOrderService activeOrderService,
+            ILogger logger)
         {
             _context = context;
             _assetService = assetService;
@@ -33,6 +36,7 @@ namespace Service.Wallet.Api.Hubs
             _currentPricesCache = currentPricesCache;
             _balanceService = balanceService;
             _activeOrderService = activeOrderService;
+            _logger = logger;
             ClientProxy = client;
 
             var httpContext = _context.GetHttpContext();

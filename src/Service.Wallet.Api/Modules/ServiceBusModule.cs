@@ -4,6 +4,7 @@ using MyJetWallet.Domain.Prices;
 using MyJetWallet.Domain.ServiceBus.PublisherSubscriber.BidAsks;
 using MyJetWallet.Sdk.Service;
 using MyServiceBus.TcpClient;
+using Service.TradeHistory.Client;
 
 namespace Service.Wallet.Api.Modules
 {
@@ -22,6 +23,8 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterInstance(new BidAskMyServiceBusSubscriber(_serviceBusClient, queue, true))
                 .As<ISubscriber<BidAsk>>()
                 .SingleInstance();
+
+            builder.RegisterTradeHistoryServiceBusClient(_serviceBusClient, queue, true);
         }
     }
 }

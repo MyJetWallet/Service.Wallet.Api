@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
 using MyJetWallet.Domain.Orders;
 using MyJetWallet.Domain.Prices;
@@ -70,9 +71,17 @@ namespace Service.Wallet.Api.Hubs
             return WalletId;
         }
 
-        private Task SendAsync(string method, object message)
+        private async Task SendAsync(string method, object message)
         {
-            return ClientProxy.SendAsync(method, message);
+            try
+            {
+                await ClientProxy.SendAsync(method, message);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Cannot send {method} to wallet '{walletId}' [{brokerId}|{brandId}|{clientId}] via connection {connectionId}",
+                    method, WalletId.WalletId, WalletId.BrokerId, WalletId.BrandId, WalletId.ClientId, ConnectionId);
+            }
         }
 
         public async Task SendPongAsync()
@@ -123,6 +132,11 @@ namespace Service.Wallet.Api.Hubs
             };
 
             await SendAsync(HubNames.ActiveOrders, message);
+        }
+
+        public Task SendTradesAsync(TradesMessage message)
+        {
+            return SendAsync(HubNames.Trades, message);
         }
     }
 }

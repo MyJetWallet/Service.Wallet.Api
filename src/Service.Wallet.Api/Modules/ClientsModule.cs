@@ -7,6 +7,7 @@ using Service.Balances.Client;
 using Service.ClientWallets.Client;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Registration.Client;
+using Service.TradeHistory.Client;
 
 namespace Service.Wallet.Api.Modules
 {
@@ -34,6 +35,10 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterBalancesClients(Program.Settings.BalancesGrpcServiceUrl, _myNoSqlClient);
 
             builder.RegisterActiveOrdersClients(Program.Settings.ActiveOrdersGrpcServiceUrl, _myNoSqlClient);
+
+            builder.RegisterTradeHistoryClient(Program.Settings.TradeHistoryGrpcServiceUrl);
+
+            
         }
     }
 }

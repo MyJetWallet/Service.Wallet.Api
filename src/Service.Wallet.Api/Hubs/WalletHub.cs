@@ -102,7 +102,7 @@ namespace Service.Wallet.Api.Hubs
                 return;
             }
 
-            var ctx = new HubClientConnection(Context, Clients.Caller, clientId, _assetService, _walletService, _currentPricesCache, _balanceService, _orderService);
+            var ctx = new HubClientConnection(Context, Clients.Caller, clientId, _assetService, _walletService, _currentPricesCache, _balanceService, _orderService, _logger);
 
             _hubManager.Connected(ctx);
 

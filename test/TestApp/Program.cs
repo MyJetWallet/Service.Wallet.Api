@@ -62,6 +62,11 @@ namespace TestApp
                 //Console.WriteLine($"--> [{HubNames.Pong}] {JsonConvert.SerializeObject(message)}\r\n");
             });
 
+            connection.On<TradesMessage>(HubNames.Trades, message =>
+            {
+                Console.WriteLine($"--> [{HubNames.Trades}] {JsonConvert.SerializeObject(message)}\r\n");
+            });
+
             //connection.On<BidAskMessage>(HubNames.BidAsk, message =>
             //{
             //    foreach (var price in message.Prices)

@@ -53,6 +53,12 @@ namespace Service.Wallet.Api.Modules
                 .AsSelf()
                 .AutoActivate()
                 .SingleInstance();
+
+            builder
+                .RegisterType<TradeNotificator>()
+                .AsSelf()
+                .AutoActivate()
+                .SingleInstance();
         }
     }
 }
