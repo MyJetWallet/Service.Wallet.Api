@@ -77,7 +77,7 @@ namespace Service.Wallet.Api.Jobs
 
             if (tasks.Any())
             {
-                _logger.LogInformation("Trades sent. Count wallet: {count}, Time: {ElapsedMilliseconds} ms",
+                _logger.LogDebug("Trades sent. Count wallet: {count}, Time: {ElapsedMilliseconds} ms",
                     tasks.Count, sw.ElapsedMilliseconds);
             }
         }

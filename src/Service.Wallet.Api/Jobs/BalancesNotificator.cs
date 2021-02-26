@@ -99,7 +99,7 @@ namespace Service.Wallet.Api.Jobs
             sw.Stop();
             if (countSent > 0)
             {
-                _logger.LogInformation("Balance updates. Count: {count}, Time: {ElapsedMilliseconds} ms",
+                _logger.LogDebug("Balance updates. Count: {count}, Time: {ElapsedMilliseconds} ms",
                     countSent, sw.ElapsedMilliseconds);
             }
         }

@@ -78,7 +78,7 @@ namespace Service.Wallet.Api.Jobs
             sw.Stop();
             if (countSent > 0)
             {
-                _logger.LogInformation("Active order updates. Count: {count}, Time: {ElapsedMilliseconds} ms",
+                _logger.LogDebug("Active order updates. Count: {count}, Time: {ElapsedMilliseconds} ms",
                     countSent, sw.ElapsedMilliseconds);
             }
         }
