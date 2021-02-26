@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DotNetCoreDecorators;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.Sdk.Service.Tools;
 using Service.TradeHistory.ServiceBus;
 using Service.Wallet.Api.Hubs;
 using Service.Wallet.Api.Hubs.Dto;
