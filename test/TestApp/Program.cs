@@ -18,6 +18,7 @@ namespace TestApp
             var connection = new HubConnectionBuilder()
                 //.WithUrl("http://localhost:8080/signalr")
                 .WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
+                
                 .AddMessagePackProtocol()
                 .Build();
 
@@ -37,6 +38,7 @@ namespace TestApp
                 Console.WriteLine($"Connection is Reconnected. Exception: {error}");
             };
             
+
             connection.On<WelcomeMessage>(HubNames.Welcome, (message) =>
             {
                 Console.WriteLine($"--> [{HubNames.Welcome}] {message.Data}\r\n");
@@ -96,7 +98,7 @@ namespace TestApp
 
             await connection.StartAsync();
 
-            await connection.SendAsync(HubNames.Init, "test");
+            await connection.SendAsync(HubNames.Init, "alex");
 
             var run = true;
 

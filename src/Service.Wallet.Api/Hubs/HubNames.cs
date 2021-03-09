@@ -61,5 +61,10 @@
         /// Trades by spot wallet
         /// </summary>
         public const string Trades = "spot-trades";
+
+        /// <summary>
+        /// [incoming] Init the connection
+        /// </summary>
+        public const string SetOrderBook = "SetOrderBook";
     }
 }

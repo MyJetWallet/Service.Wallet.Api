@@ -12,6 +12,8 @@ namespace Service.Wallet.Api.Jobs
 {
     public class PriceChangesNotificator : IStartable, IDisposable
     {
+        public int TimerDelayMs = 100;
+
         private readonly IHubManager _hubManager;
         
         private Dictionary<string, BidAsk> _lastPrices = new Dictionary<string, BidAsk>();
@@ -23,7 +25,7 @@ namespace Service.Wallet.Api.Jobs
         {
             _hubManager = hubManager;
             priceSubscriber.Subscribe(HandlePriceUpdate);
-            _timer = new MyTaskTimer(nameof(PriceChangesNotificator), TimeSpan.FromMilliseconds(500), logger, DoProcess); 
+            _timer = new MyTaskTimer(nameof(PriceChangesNotificator), TimeSpan.FromMilliseconds(TimerDelayMs), logger, DoProcess); 
         }
 
         private ValueTask HandlePriceUpdate(BidAsk price)

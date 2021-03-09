@@ -138,5 +138,11 @@ namespace Service.Wallet.Api.Hubs
         {
             return SendAsync(HubNames.Trades, message);
         }
+
+        public async Task SendOrderBook()
+        {
+            
+
+        }
     }
 }

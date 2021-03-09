@@ -125,12 +125,6 @@ namespace Service.Wallet.Api.Hubs
         [SignalRIncomingRequest]
         public async Task SetWallet(string walletId)
         {
-            //todo: Send asset dictionary: [spot instrument list]; [send asset list (assetId, Name, accuracy,..., list of exchange assets and pairs detail)]
-            //todo: associate connection with wallet
-            //todo: send balances
-            //todo: send active orders
-            //todo: send asset deposit\withdrawal list (asset, deposit processors[], withdrawal processors[])
-
             var ctx = TryGetConnection();
 
             if (ctx == null)
@@ -155,6 +149,22 @@ namespace Service.Wallet.Api.Hubs
             await ctx.SendWalletSpotInstrumentsAsync();
             await ctx.SendWalletBalancesAsync();
             await ctx.SendActiveOrdersAsync();
+        }
+
+        [SignalRIncomingRequest]
+        public async Task SetOrderBook(string symbol)
+        {
+            var ctx = TryGetConnection();
+
+            if (ctx == null)
+            {
+                _logger.LogInformation("[HUB][ERROR] Receive SetWallet but connection do not inited");
+                return;
+            }
+
+            ctx.SetOrderBook(symbol);
+
+            await ctx.SendOrderBook();
         }
 
         public async Task Ping()

@@ -53,6 +53,11 @@ namespace Service.Wallet.Api.Hubs
             WalletId = walletId;
         }
 
+        public void SetOrderBook(string symbol)
+        {
+            ActiveOrderBook = symbol;
+        }
+
         // client context for the connection
         //
         //public string ActiveAccountId { get; set; }
@@ -71,5 +76,7 @@ namespace Service.Wallet.Api.Hubs
         public JetClientIdentity ClientId { get; }
 
         public JetWalletIdentity WalletId { get; private set; }
+
+        public string ActiveOrderBook { get; private set; }
     }
 }
