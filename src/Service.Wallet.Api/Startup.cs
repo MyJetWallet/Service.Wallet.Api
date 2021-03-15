@@ -61,11 +61,14 @@ namespace Service.Wallet.Api
                 
             });//.AddNewtonsoftJson(); //todo: ask why we use NewtonsoftJson?
 
-            services.AddSignalR(option =>
-            {
-                option.EnableDetailedErrors = true;
+            services
+                .AddSignalR(option =>
+                {
+                    option.EnableDetailedErrors = true;
 
-            }).AddMessagePackProtocol();
+                })
+                //.AddMessagePackProtocol()
+                ;
             
             services
                 .AddAuthentication(o => { o.DefaultScheme = "Bearer"; })

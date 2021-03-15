@@ -19,7 +19,7 @@ namespace TestApp
                 //.WithUrl("http://localhost:8080/signalr")
                 .WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
                 
-                .AddMessagePackProtocol()
+                //.AddMessagePackProtocol()
                 .Build();
 
 
@@ -69,13 +69,13 @@ namespace TestApp
                 Console.WriteLine($"--> [{HubNames.Trades}] {JsonConvert.SerializeObject(message)}\r\n");
             });
 
-            //connection.On<BidAskMessage>(HubNames.BidAsk, message =>
-            //{
-            //    foreach (var price in message.Prices)
-            //    {
-            //        Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime.TimeOfDay}\r\n");
-            //    }
-            //});
+            connection.On<BidAskMessage>(HubNames.BidAsk, message =>
+            {
+                foreach (var price in message.Prices)
+                {
+                    Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime.TimeOfDay}\r\n");
+                }
+            });
 
             connection.On<ActiveOrdersMessage>(HubNames.ActiveOrders, message =>
             {
