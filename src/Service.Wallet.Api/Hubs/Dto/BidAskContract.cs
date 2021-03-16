@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetCoreDecorators;
 using MessagePack;
 using MyJetWallet.Domain.Prices;
 
@@ -12,7 +13,7 @@ namespace Service.Wallet.Api.Hubs.Dto
         public string Id { get; set; }
 
         [Key("T")]
-        public DateTime DateTime { get; set; }
+        public long DateTime { get; set; }
 
         [Key("B")]
         public double Bid { get; set; }
@@ -25,7 +26,7 @@ namespace Service.Wallet.Api.Hubs.Dto
             return new BidAskContract()
             {
                 Id = price.Id,
-                DateTime = price.DateTime,
+                DateTime = price.DateTime.UnixTime(),
                 Ask = price.Ask,
                 Bid = price.Bid
             };

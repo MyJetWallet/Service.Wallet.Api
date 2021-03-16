@@ -77,7 +77,7 @@ namespace TestApp
                 foreach (var price in message.Prices)
                 {
                     
-                    Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime.TimeOfDay}\r\n");
+                    Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime}\r\n");
                 }
             });
 

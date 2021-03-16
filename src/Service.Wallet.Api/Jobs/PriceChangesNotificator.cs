@@ -13,7 +13,7 @@ namespace Service.Wallet.Api.Jobs
 {
     public class PriceChangesNotificator : IStartable, IDisposable
     {
-        public int TimerDelayMs = 500;
+        public int TimerDelayMs = 100;
 
         private readonly IHubManager _hubManager;
         

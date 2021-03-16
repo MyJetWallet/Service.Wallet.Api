@@ -117,7 +117,6 @@ namespace Service.Wallet.Api
                 builder.AllowAnyHeader();
                 builder.AllowAnyMethod();
                 builder.AllowAnyOrigin();
-                builder.AllowCredentials();
             });
 
             app.UseAuthentication();
