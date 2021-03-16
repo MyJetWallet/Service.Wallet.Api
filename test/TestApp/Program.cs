@@ -72,8 +72,11 @@ namespace TestApp
 
             connection.On<BidAskMessage>(HubNames.BidAsk, message =>
             {
+                Console.WriteLine($"--> {JsonConvert.SerializeObject(message)}");
+
                 foreach (var price in message.Prices)
                 {
+                    
                     Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime.TimeOfDay}\r\n");
                 }
             });
@@ -108,7 +111,7 @@ namespace TestApp
                 while (run)
                 {
                     await Task.Delay(5000);
-                    await connection.SendAsync(HubNames.Ping);
+                    //await connection.SendAsync(HubNames.Ping);
                 }
             });
 

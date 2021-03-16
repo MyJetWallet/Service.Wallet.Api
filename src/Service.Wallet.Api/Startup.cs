@@ -112,6 +112,13 @@ namespace Service.Wallet.Api
 
             app.UseMiddleware<ExceptionLogMiddleware>();
 
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyHeader();
+                builder.AllowAnyMethod();
+                builder.AllowAnyOrigin();
+                builder.AllowCredentials();
+            });
 
             app.UseAuthentication();
             app.UseAuthorization();
