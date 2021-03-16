@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text;
@@ -161,18 +162,40 @@ namespace Service.Wallet.Api
             //WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
             var rnd = new Random();
+
+            var prices = new Dictionary<string, decimal>()
+            {
+                { "BTCUSD", 50000m },
+                { "ETHUSD", 1800m },
+                { "LTCUSD", 200m },
+                { "BTCEUR", 49000m },
+                { "ETHEUR", 1600m },
+                { "LTCEUR", 180m }
+            };
+
             var isActive = true;
             while (isActive)
             {
                 try
                 {
-                    var price = rnd.Next(1000) / 10.0 - 50.0 + 50000.0;
-                    price = Math.Round(price, 1);
+                    foreach (var symbol in prices.Keys.ToList())
+                    {
+                        // 0.00001
+                        // 0.00050
+                        // 0.00100
+                        var d = rnd.Next(100)/10000m - 0.0050m;
 
-                    var msg = JsonConvert.SerializeObject(new {S = "BTCUSD", P = price, Ts = DateTimeOffset.UtcNow});
-                    var buf = Encoding.UTF8.GetBytes(msg);
+                        var price = prices[symbol];
 
-                    await webSocket.SendAsync(buf, WebSocketMessageType.Text, true, CancellationToken.None);
+                        price = price + price * d;
+                        price = Math.Round(price, 4);
+                        prices[symbol] = price;
+
+                        var msg = JsonConvert.SerializeObject(new { S = symbol, P = price, Ts = DateTime.UtcNow });
+                        var buf = Encoding.UTF8.GetBytes(msg);
+                        await webSocket.SendAsync(buf, WebSocketMessageType.Text, true, CancellationToken.None);
+                    }
+
                     await Task.Delay(1000);
                 }
                 catch (Exception ex)
