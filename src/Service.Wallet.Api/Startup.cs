@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.WebSockets;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.DataReader;
 using MyServiceBus.TcpClient;
+using Newtonsoft.Json;
 using Prometheus;
 using Service.Wallet.Api.Authentication;
 using Service.Wallet.Api.Hubs;
@@ -110,6 +115,31 @@ namespace Service.Wallet.Api
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseWebSockets();
+
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path == "/ws")
+                {
+                    if (context.WebSockets.IsWebSocketRequest)
+                    {
+                        using (WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync())
+                        {
+                            await Echo(context, webSocket);
+                        }
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 400;
+                    }
+                }
+                else
+                {
+                    await next();
+                }
+
+            });
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -119,6 +149,36 @@ namespace Service.Wallet.Api
 
             _myNoSqlClient.Start();
             _serviceBusClient.Start();
+        }
+
+        private async Task Echo(HttpContext context, WebSocket webSocket)
+        {
+            var buffer = new byte[1024 * 4];
+            WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+            var rnd = new Random();
+            var isActive = true;
+            while (isActive)
+            {
+                try
+                {
+                    var price = rnd.Next(1000) / 10.0 - 50.0 + 50000.0;
+                    price = Math.Round(price, 1);
+
+                    var msg = JsonConvert.SerializeObject(new {S = "BTCUSD", P = price, Ts = DateTimeOffset.UtcNow});
+                    var buf = Encoding.UTF8.GetBytes(msg);
+
+                    await webSocket.SendAsync(buf, WebSocketMessageType.Text, true, CancellationToken.None);
+                    await Task.Delay(1000);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    isActive = false;
+                }
+            }
+
+            //await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
