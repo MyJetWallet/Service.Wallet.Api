@@ -121,6 +121,8 @@ namespace Service.Wallet.Api
             {
                 if (context.Request.Path == "/ws")
                 {
+                    Console.WriteLine($"Receive request to /ws. context.WebSockets.IsWebSocketRequest: {context.WebSockets.IsWebSocketRequest}");
+
                     if (context.WebSockets.IsWebSocketRequest)
                     {
                         using (WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync())
@@ -146,6 +148,8 @@ namespace Service.Wallet.Api
                 endpoints.MapHub<WalletHub>("/signalr");
             });
 
+            app.UseFileServer();
+
 
             _myNoSqlClient.Start();
             _serviceBusClient.Start();
@@ -153,8 +157,8 @@ namespace Service.Wallet.Api
 
         private async Task Echo(HttpContext context, WebSocket webSocket)
         {
-            var buffer = new byte[1024 * 4];
-            WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            //var buffer = new byte[1024 * 4];
+            //WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
             var rnd = new Random();
             var isActive = true;
