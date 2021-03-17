@@ -7,6 +7,7 @@ using Service.Balances.Client;
 using Service.ClientWallets.Client;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Registration.Client;
+using Service.Service.KYC.Client;
 using Service.TradeHistory.Client;
 
 namespace Service.Wallet.Api.Modules
@@ -38,6 +39,7 @@ namespace Service.Wallet.Api.Modules
 
             builder.RegisterTradeHistoryClient(Program.Settings.TradeHistoryGrpcServiceUrl);
 
+            builder.RegisterKycStatusClients(_myNoSqlClient, Program.Settings.KycGrpcServiceUrl);
             
         }
     }

@@ -26,6 +26,7 @@
     <PackageReference Include="MyJetWallet.Service.Balances.Client" Version="1.0.5" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.PriceSource.Client" Version="1.0.0" />
     <PackageReference Include="MyJetWallet.Service.Registration.Client" Version="1.0.0" />
+    <PackageReference Include="MyJetWallet.Service.Service.KYC.Client" Version="1.0.3" />
     <PackageReference Include="MyJetWallet.Service.TradeHistory.Client" Version="1.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NSwag.AspNetCore" Version="13.10.6" />

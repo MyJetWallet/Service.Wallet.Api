@@ -32,6 +32,7 @@ namespace Service.Wallet.Api.Settings
         [YamlProperty("WalletApi.TradeHistoryGrpcServiceUrl")]
         public string TradeHistoryGrpcServiceUrl { get; set; }
 
-        
+        [YamlProperty("WalletApi.KycGrpcServiceUrl")]
+        public string KycGrpcServiceUrl { get; set; }
     }
 }

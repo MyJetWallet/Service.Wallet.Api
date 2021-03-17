@@ -9,6 +9,7 @@
     <PackageReference Include="MyJetWallet.Domain" Version="1.0.19" />
     <PackageReference Include="MyJetWallet.MatchingEngine.Grpc" Version="1.0.1" />
     <PackageReference Include="MyJetWallet.Service.ClientWallets.Client" Version="1.0.4" />
+    <PackageReference Include="MyJetWallet.Service.Service.KYC.Client" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>
