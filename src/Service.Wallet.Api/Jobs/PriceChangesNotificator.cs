@@ -48,7 +48,12 @@ namespace Service.Wallet.Api.Jobs
             { "LTCUSD", 200m },
             { "BTCEUR", 49000m },
             { "ETHEUR", 1600m },
-            { "LTCEUR", 180m }
+            { "LTCEUR", 180m },
+            { "Index", 1m },
+            { "ADAUSD", 1.2480m },
+            { "XRPUSD", 0.46m },
+            { "BATUSD", 0.9930m },
+            { "DOTUSD", 35.17m }
         };
 
         private Random _rnd = new Random();
@@ -64,7 +69,7 @@ namespace Service.Wallet.Api.Jobs
 
             var dt = DateTime.UtcNow;
 
-            foreach (var symbol in _prices.Keys.ToList())
+            foreach (var symbol in _prices.Keys.Where(e => e != "Index").ToList())
             {
                 // 0.00001
                 // 0.00050
@@ -81,6 +86,24 @@ namespace Service.Wallet.Api.Jobs
                 {
                     Ask = (double) price,
                     Bid = (double) price,
+                    Id = symbol,
+                    LiquidityProvider = "jetwallet",
+                    DateTime = dt
+                };
+            }
+
+            {
+                var symbol = "Index";
+
+                var price = _prices["Index"] = _prices["Index"] + 1;
+                if (price > 1000000)
+                    _prices["Index"] = 1;
+
+
+                last[symbol] = new BidAsk()
+                {
+                    Ask = (double)price,
+                    Bid = (double)price,
                     Id = symbol,
                     LiquidityProvider = "jetwallet",
                     DateTime = dt
