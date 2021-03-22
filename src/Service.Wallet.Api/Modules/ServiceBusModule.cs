@@ -1,8 +1,10 @@
-﻿using Autofac;
+﻿using System.Collections.Generic;
+using Autofac;
 using DotNetCoreDecorators;
 using MyJetWallet.Domain.Prices;
 using MyJetWallet.Domain.ServiceBus.PublisherSubscriber.BidAsks;
 using MyJetWallet.Sdk.Service;
+using MyServiceBus.Abstractions;
 using MyServiceBus.TcpClient;
 using Service.TradeHistory.Client;
 
@@ -20,11 +22,11 @@ namespace Service.Wallet.Api.Modules
         protected override void Load(ContainerBuilder builder)
         {
             var queue = $"WalletAPi-{ApplicationEnvironment.HostName}";
-            builder.RegisterInstance(new BidAskMyServiceBusSubscriber(_serviceBusClient, queue, true))
-                .As<ISubscriber<BidAsk>>()
+            builder.RegisterInstance(new BidAskMyServiceBusSubscriber(_serviceBusClient, queue, TopicQueueType.DeleteOnDisconnect, true))
+                .As<ISubscriber<IReadOnlyList<BidAsk>>>()
                 .SingleInstance();
 
-            builder.RegisterTradeHistoryServiceBusClient(_serviceBusClient, queue, true);
+            builder.RegisterTradeHistoryServiceBusClient(_serviceBusClient, queue, TopicQueueType.DeleteOnDisconnect, true);
         }
     }
 }

@@ -22,16 +22,25 @@ namespace Service.Wallet.Api.Jobs
 
         private readonly MyTaskTimer _timer;
 
-        public PriceChangesNotificator(IHubManager hubManager, ISubscriber<BidAsk> priceSubscriber, ILogger<PriceChangesNotificator> logger)
+        public PriceChangesNotificator(IHubManager hubManager, ISubscriber<IReadOnlyList<BidAsk>> priceSubscriber, ILogger<PriceChangesNotificator> logger)
         {
             _hubManager = hubManager;
             priceSubscriber.Subscribe(HandlePriceUpdate);
             _timer = new MyTaskTimer(nameof(PriceChangesNotificator), TimeSpan.FromMilliseconds(TimerDelayMs), logger, DoProcess); 
         }
 
-        private ValueTask HandlePriceUpdate(BidAsk price)
+        private ValueTask HandlePriceUpdate(IReadOnlyList<BidAsk> prices)
         {
-            lock (_gate) _lastPrices[price.LiquidityProvider + price.Id] = price;
+            lock (_gate)
+            {
+                foreach (var group in prices.GroupBy(e => $"{e.LiquidityProvider}{e.Id}"))
+                {
+                    var ts = group.Max(e => e.DateTime);
+                    var price = group.First(e => e.DateTime == ts);
+                    _lastPrices[group.Key] = price;
+                }
+            }
+
             return new ValueTask();
         }
 

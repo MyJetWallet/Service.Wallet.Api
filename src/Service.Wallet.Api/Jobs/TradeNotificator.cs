@@ -20,12 +20,18 @@ namespace Service.Wallet.Api.Jobs
         private readonly MyBuffer<WalletTradeMessage> _buffer = new MyBuffer<WalletTradeMessage>();
 
 
-        public TradeNotificator(IHubManager hubManager, ISubscriber<WalletTradeMessage> priceSubscriber, ILogger<TradeNotificator> logger)
+        public TradeNotificator(IHubManager hubManager, ISubscriber<IReadOnlyList<WalletTradeMessage>> tradeSubscriber, ILogger<TradeNotificator> logger)
         {
             _hubManager = hubManager;
             _logger = logger;
             _timer = new MyTaskTimer(nameof(TradeNotificator), TimeSpan.FromMilliseconds(500), logger, DoSendNotifications);
-            priceSubscriber.Subscribe(HandleEvent);
+            tradeSubscriber.Subscribe(HandleEvent);
+        }
+
+        private ValueTask HandleEvent(IReadOnlyList<WalletTradeMessage> trades)
+        {
+            _buffer.AddRange(trades);
+            return ValueTask.CompletedTask;
         }
 
         public void Start()
