@@ -8,8 +8,13 @@ using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain.Assets;
 using Service.AssetsDictionary.Client;
 using Service.Balances.Grpc;
+using Service.Bitgo.DepositDetector.Domain.Models;
+using Service.Bitgo.DepositDetector.Grpc;
 using Service.Bitgo.WithdrawalProcessor.Grpc;
 using Service.Bitgo.WithdrawalProcessor.Grpc.Models;
+using Service.Service.KYC.Client;
+using Service.Service.KYC.Domain.Models;
+using Service.Service.KYC.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
 
@@ -24,21 +29,72 @@ namespace Service.Wallet.Api.Controllers
         private readonly ICryptoWithdrawalService _cryptoWithdrawalService;
         private readonly IAssetsDictionaryClient _assetsDictionaryClient;
         private readonly IWalletBalanceService _balanceService;
+        private readonly IBitgoDepositAddressService _addressService;
+        private readonly IKycStatusClient _kycStatusClient;
 
         public BlockchainController(ILogger<BlockchainController> logger, 
             ICryptoWithdrawalService cryptoWithdrawalService,
             IAssetsDictionaryClient assetsDictionaryClient,
-                IWalletBalanceService balanceService)
+            IWalletBalanceService balanceService,
+            IBitgoDepositAddressService addressService,
+            IKycStatusClient kycStatusClient)
         {
             _logger = logger;
             _cryptoWithdrawalService = cryptoWithdrawalService;
             _assetsDictionaryClient = assetsDictionaryClient;
             _balanceService = balanceService;
+            _addressService = addressService;
+            _kycStatusClient = kycStatusClient;
         }
 
         public async Task<Response<GenerateDepositAddressResponse>> GenerateDepositAddressAsync(GenerateDepositAddressRequest request)
         {
-            throw new NotImplementedException();
+            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
+
+            _logger.LogInformation("Receive Generate deposit address. User: {brokerId}|{clientId}. Request: {jsonText}",
+                walletId.BrokerId, walletId.ClientId, JsonSerializer.Serialize(request));
+
+            var asset = _assetsDictionaryClient.GetAssetById(new AssetIdentity()
+            {
+                BrokerId = walletId.BrokerId,
+                Symbol = request.AssetSymbol
+            });
+
+            if (asset == null)
+                throw new WalletApiErrorException("Asset do not found", ApiResponseCodes.AssetDoNotFound);
+
+            if (!asset.IsEnabled)
+                throw new WalletApiErrorException("Asset is disabled", ApiResponseCodes.AssetIsDisabled);
+
+            if (asset.KycRequiredForDeposit)
+            {
+                var kycStatus = _kycStatusClient.GetClientKycStatus(new KycStatusRequest()
+                {
+                    BrokerId = walletId.BrokerId,
+                    ClientId = walletId.ClientId
+                });
+
+                if (kycStatus.Status != KycStatus.Verified)
+                    throw new WalletApiErrorException("KYC is required", ApiResponseCodes.KycNotPassed);
+            }
+
+            var result = await _addressService.GetDepositAddressAsync(new GetDepositAddressRequest()
+            {
+                BrokerId = walletId.BrokerId,
+                WalletId = walletId.WalletId,
+                ClientId = walletId.ClientId,
+                AssetSymbol = asset.Symbol
+            });
+
+
+            if (result.Error == GetDepositAddressResponse.ErrorCode.AssetDoNotSupported)
+                throw new WalletApiErrorException("Crypto withdrawal do not supported for asset", ApiResponseCodes.AssetDoNotSupported);
+
+            //todo: получить отдельно адрес, отдельно мемо и тип мемо
+            return new Response<GenerateDepositAddressResponse>(new GenerateDepositAddressResponse()
+            {
+                Address = result.Address
+            });
         }
 
         public async Task<Response<WithdrawalResponse>> WithdrawalAsync(WithdrawalRequest request)
@@ -76,7 +132,19 @@ namespace Service.Wallet.Api.Controllers
             if (balance.Balance - balance.Reserve - amount <= -Double.Epsilon)
                 throw new WalletApiErrorException("Low balance", ApiResponseCodes.LowBalance);
 
-            
+            if (asset.KycRequiredForDeposit)
+            {
+                var kycStatus = _kycStatusClient.GetClientKycStatus(new KycStatusRequest()
+                {
+                    BrokerId = walletId.BrokerId,
+                    ClientId = walletId.ClientId
+                });
+
+                if (kycStatus.Status != KycStatus.Verified)
+                    throw new WalletApiErrorException("KYC is required", ApiResponseCodes.KycNotPassed);
+            }
+
+
             // ------- execute ------- 
 
             var result = await _cryptoWithdrawalService.CryptoWithdrawalAsync(new CryptoWithdrawalRequest()

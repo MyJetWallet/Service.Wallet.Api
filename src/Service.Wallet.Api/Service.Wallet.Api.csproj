@@ -24,6 +24,7 @@
     <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.0.10" />
     <PackageReference Include="MyJetWallet.Service.ActiveOrders.Client" Version="1.0.2" />
     <PackageReference Include="MyJetWallet.Service.Balances.Client" Version="1.0.5" />
+    <PackageReference Include="MyJetWallet.Service.Bitgo.DepositDetector.Client" Version="1.1.1" />
     <PackageReference Include="MyJetWallet.Service.Bitgo.WithdrawalProcessor.Client" Version="1.0.0" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.PriceSource.Client" Version="1.0.0" />
     <PackageReference Include="MyJetWallet.Service.Registration.Client" Version="1.0.0" />

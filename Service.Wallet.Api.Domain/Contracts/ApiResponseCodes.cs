@@ -13,8 +13,9 @@ namespace Service.Wallet.Api.Domain.Contracts
         AddressIsNotValid = 5,
         AssetDoNotFound = 6,
         AssetIsDisabled = 7,
-        AmountIsSmall = 8
+        AmountIsSmall = 8,
         InvalidInstrument = 9,
         KycNotPassed = 10,
+        AssetDoNotSupported = 11
     }
 }
