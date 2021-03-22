@@ -47,6 +47,10 @@ namespace Service.Wallet.Api.Controllers
             _kycStatusClient = kycStatusClient;
         }
 
+        /// <summary>
+        /// Generate crypto deposit address
+        /// </summary>
+        [HttpPost("generate-deposit-address")]
         public async Task<Response<GenerateDepositAddressResponse>> GenerateDepositAddressAsync(GenerateDepositAddressRequest request)
         {
             var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
@@ -97,6 +101,10 @@ namespace Service.Wallet.Api.Controllers
             });
         }
 
+        /// <summary>
+        /// execute crypto withdrawal
+        /// </summary>
+        [HttpPost("withdrawal")]
         public async Task<Response<WithdrawalResponse>> WithdrawalAsync(WithdrawalRequest request)
         {
             var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
