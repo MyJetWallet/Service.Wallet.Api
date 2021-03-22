@@ -4,6 +4,7 @@ using MyNoSqlServer.DataReader;
 using Service.ActiveOrders.Client;
 using Service.AssetsDictionary.Client;
 using Service.Balances.Client;
+using Service.Bitgo.WithdrawalProcessor.Client;
 using Service.ClientWallets.Client;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Registration.Client;
@@ -39,6 +40,9 @@ namespace Service.Wallet.Api.Modules
 
             builder.RegisterTradeHistoryClient(Program.Settings.TradeHistoryGrpcServiceUrl);
 
+            //builder.RegisterBitgoDepositAddressClient(Program.Settings.BitgoDepositDetectorGrpcServiceUrl, _myNoSqlClient);
+            builder.RegisterBitgoCryptoWithdrawalClient(Program.Settings.BitgoCryptoWithdrawalGrpcServiceUrl);
+            
             builder.RegisterKycStatusClients(_myNoSqlClient, Program.Settings.KycGrpcServiceUrl);
             
         }

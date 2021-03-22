@@ -32,7 +32,12 @@ namespace Service.Wallet.Api.Settings
         [YamlProperty("WalletApi.TradeHistoryGrpcServiceUrl")]
         public string TradeHistoryGrpcServiceUrl { get; set; }
 
+        [YamlProperty("WalletApi.BitgoDepositDetectorGrpcServiceUrl")]
+        public string BitgoDepositDetectorGrpcServiceUrl { get; set; }
+
         [YamlProperty("WalletApi.KycGrpcServiceUrl")]
         public string KycGrpcServiceUrl { get; set; }
+        [YamlProperty("WalletApi.BitgoCryptoWithdrawalGrpcServiceUrl")]
+        public string BitgoCryptoWithdrawalGrpcServiceUrl { get; set; }
     }
 }

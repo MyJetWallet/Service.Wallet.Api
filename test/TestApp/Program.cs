@@ -16,9 +16,9 @@ namespace TestApp
             Console.ReadLine();
 
             var connection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:8080/signalr")
+                //.WithUrl("http://localhost:8080/signalr")
                 //.WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
-                //.WithUrl("https://wallet-api-spot.mnftx.biz/signalr")
+                .WithUrl("https://wallet-api-spot.mnftx.biz/signalr")
                 //.WithUrl("http://20.50.189.25:8080/signalr")
                 //.AddMessagePackProtocol()
                 .Build();
@@ -70,16 +70,16 @@ namespace TestApp
                 Console.WriteLine($"--> [{HubNames.Trades}] {JsonConvert.SerializeObject(message)}\r\n");
             });
 
-            connection.On<BidAskMessage>(HubNames.BidAsk, message =>
-            {
-                Console.WriteLine($"--> {JsonConvert.SerializeObject(message)}");
+            //connection.On<BidAskMessage>(HubNames.BidAsk, message =>
+            //{
+            //    Console.WriteLine($"--> {JsonConvert.SerializeObject(message)}");
 
-                foreach (var price in message.Prices)
-                {
+            //    foreach (var price in message.Prices)
+            //    {
                     
-                    Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime}\r\n");
-                }
-            });
+            //        Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime}\r\n");
+            //    }
+            //});
 
             connection.On<ActiveOrdersMessage>(HubNames.ActiveOrders, message =>
             {

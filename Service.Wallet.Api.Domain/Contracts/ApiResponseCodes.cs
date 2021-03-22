@@ -8,7 +8,13 @@ namespace Service.Wallet.Api.Domain.Contracts
         OK = 0,
         InternalServerError = 1,
         WalletDoNotExist = 2,
-        InvalidInstrument = 3,
-        KycNotPassed = 4,
+        LowBalance = 3,
+        CannotProcessWithdrawal = 4,
+        AddressIsNotValid = 5,
+        AssetDoNotFound = 6,
+        AssetIsDisabled = 7,
+        AmountIsSmall = 8
+        InvalidInstrument = 9,
+        KycNotPassed = 10,
     }
 }
