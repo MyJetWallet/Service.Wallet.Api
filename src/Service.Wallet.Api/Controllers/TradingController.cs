@@ -84,6 +84,33 @@ namespace Service.Wallet.Api.Controllers
 
             return new Response<CreatedOrderResponse>(response);
         }
+        
+        /// <summary>
+        /// Execute fill-or-kill market order
+        /// </summary>
+        [HttpPost("create-swap-order")]
+        public async Task<Response<CreatedOrderResponse>> CreateSwapOrderAsync([FromBody] CreateSwapOrderRequest request)
+        {
+            if (request == null) throw new WalletApiBadRequestException("request cannot be null");
+            if (request.Volume <= 0) throw new WalletApiBadRequestException("volume cannot be zero or negative");
+            if (string.IsNullOrEmpty(request.InstrumentSymbol)) throw new WalletApiBadRequestException("InstrumentSymbol cannot be empty");
+            if (string.IsNullOrEmpty(request.VolumeAssetSymbol)) throw new WalletApiBadRequestException("VolumeAssetSymbol cannot be empty");
+
+            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
+
+            //todo: exec create order for walletId
+
+            (string orderId, double price) = await _orderService.CreateSwapOrderAsync(walletId, request.InstrumentSymbol, request.Volume, request.VolumeAssetSymbol, request.Side);
+
+            var response = new CreatedOrderResponse()
+            {
+                Type = OrderType.Limit,
+                OrderId = orderId,
+                OrderPrice = price
+            };
+
+            return new Response<CreatedOrderResponse>(response);
+        }
 
         /// <summary>
         /// Cancel limit order by ID
