@@ -31,18 +31,21 @@ namespace Service.Wallet.Api.Controllers
         private readonly IAssetsDictionaryClient _assetsDictionaryClient;
         private readonly IWalletBalanceService _balanceService;
         private readonly IKycStatusClient _kycStatusClient;
+        private readonly IAssetPaymentSettingsClient _assetPaymentSettingsClient;
 
         public BlockchainController(ILogger<BlockchainController> logger,
             IBlockchainIntegrationService blockchainIntegrationService,
             IAssetsDictionaryClient assetsDictionaryClient,
             IWalletBalanceService balanceService,
-            IKycStatusClient kycStatusClient)
+            IKycStatusClient kycStatusClient,
+            IAssetPaymentSettingsClient assetPaymentSettingsClient)
         {
             _logger = logger;
             _blockchainIntegrationService = blockchainIntegrationService;
             _assetsDictionaryClient = assetsDictionaryClient;
             _balanceService = balanceService;
             _kycStatusClient = kycStatusClient;
+            _assetPaymentSettingsClient = assetPaymentSettingsClient;
         }
 
         /// <summary>
@@ -56,11 +59,17 @@ namespace Service.Wallet.Api.Controllers
             _logger.LogInformation("Receive Generate deposit address. User: {brokerId}|{clientId}. Request: {jsonText}",
                 walletId.BrokerId, walletId.ClientId, JsonSerializer.Serialize(request));
 
-            var asset = _assetsDictionaryClient.GetAssetById(new AssetIdentity()
+            var assetIdentity = new AssetIdentity()
             {
                 BrokerId = walletId.BrokerId,
                 Symbol = request.AssetSymbol
-            });
+            };
+
+            var paymentSettings = _assetPaymentSettingsClient.GetAssetById(assetIdentity);
+            if (paymentSettings?.BitGoCrypto?.IsEnabledDeposit != true)
+                throw new WalletApiErrorException("Crypto deposit do not supported", ApiResponseCodes.AssetDoNotSupported);
+
+            var asset = _assetsDictionaryClient.GetAssetById(assetIdentity);
 
             if (asset == null)
                 throw new WalletApiErrorException("Asset do not found", ApiResponseCodes.AssetDoNotFound);
@@ -112,14 +121,21 @@ namespace Service.Wallet.Api.Controllers
             _logger.LogInformation("Receive Crypto Withdrawal User: {brokerId}|{clientId}. RequestId: {requestId}. Request: {jsonText}", 
                 walletId.BrokerId, walletId.ClientId, requestId, JsonSerializer.Serialize(request));
 
-            var asset = _assetsDictionaryClient.GetAssetById(new AssetIdentity()
+            var assetIdentity = new AssetIdentity()
             {
-                BrokerId =walletId.BrokerId,
+                BrokerId = walletId.BrokerId,
                 Symbol = request.AssetSymbol
-            });
+            };
+
+            var paymentSettings = _assetPaymentSettingsClient.GetAssetById(assetIdentity);
+
+            var asset = _assetsDictionaryClient.GetAssetById(assetIdentity);
 
 
             // ------- validations ------- 
+
+            if (paymentSettings?.BitGoCrypto?.IsEnabledWithdrawal != true)
+                throw new WalletApiErrorException("Crypto withdrawal do not supported", ApiResponseCodes.AssetDoNotSupported);
 
             if (asset == null)
                 throw new WalletApiErrorException("Asset do not found", ApiResponseCodes.AssetDoNotFound);
@@ -128,7 +144,7 @@ namespace Service.Wallet.Api.Controllers
                 throw new WalletApiErrorException("Asset is disabled", ApiResponseCodes.AssetIsDisabled);
 
             var amount = Math.Round(request.Amount, asset.Accuracy);
-            var minAmount = 0; //todo: получить минимальный баланс для вывода из настроек
+            var minAmount = paymentSettings.BitGoCrypto.MinWithdrawalAmount;
 
             if (amount <= minAmount)
                 throw new WalletApiErrorException($"Amount is small. Min amount should be {minAmount}", ApiResponseCodes.AmountIsSmall);
@@ -178,7 +194,6 @@ namespace Service.Wallet.Api.Controllers
             switch (result.Error?.Code)
             {
                 case BitgoErrorType.ErrorCode.LowBalance:
-                case BitgoErrorType.ErrorCode.BalanceNotEnough:
                     throw new WalletApiErrorException("Low balance", ApiResponseCodes.LowBalance);
 
                 case BitgoErrorType.ErrorCode.AssetIsNotFoundInBitGo:
@@ -188,8 +203,6 @@ namespace Service.Wallet.Api.Controllers
                     throw new WalletApiErrorException("Destination address is not valid", ApiResponseCodes.AddressIsNotValid);
 
                 case BitgoErrorType.ErrorCode.InternalError:
-                case BitgoErrorType.ErrorCode.AssetDoNotFound:
-                case BitgoErrorType.ErrorCode.AssetIsDisabled:
                     throw new WalletApiErrorException(result.Error.Message, ApiResponseCodes.InternalServerError);
             }
 
@@ -209,11 +222,18 @@ namespace Service.Wallet.Api.Controllers
         {
             var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
 
-            var asset = _assetsDictionaryClient.GetAssetById(new AssetIdentity()
+            var assetIdentity = new AssetIdentity()
             {
                 BrokerId = walletId.BrokerId,
                 Symbol = request.AssetSymbol
-            });
+            };
+
+            var paymentSettings = _assetPaymentSettingsClient.GetAssetById(assetIdentity);
+            if (paymentSettings?.BitGoCrypto?.IsEnabledWithdrawal != true)
+                throw new WalletApiErrorException("Crypto withdrawal do not supported", ApiResponseCodes.AssetDoNotSupported);
+
+
+            var asset = _assetsDictionaryClient.GetAssetById(assetIdentity);
 
             if (asset == null)
                 throw new WalletApiErrorException("Asset do not found", ApiResponseCodes.AssetDoNotFound);

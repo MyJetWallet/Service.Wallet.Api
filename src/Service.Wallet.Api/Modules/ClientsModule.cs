@@ -28,6 +28,8 @@ namespace Service.Wallet.Api.Modules
         {
             builder.RegisterAssetsDictionaryClients(_myNoSqlClient);
 
+            builder.RegisterAssetPaymentSettingsClients(_myNoSqlClient);
+
             builder.RegisterClientWalletsClients(_myNoSqlClient, Program.Settings.ClientWalletsGrpcServiceUrl);
 
             builder.RegisterMatchingEnginePriceSourceClient(_myNoSqlClient);

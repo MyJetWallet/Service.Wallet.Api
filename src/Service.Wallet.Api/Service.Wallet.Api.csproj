@@ -26,12 +26,12 @@
     <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="1.5.0" />
     <PackageReference Include="MyJetWallet.Service.Balances.Client" Version="1.0.5" />
     <PackageReference Include="MyJetWallet.Service.Bitgo.DepositDetector.Client" Version="1.1.1" />
-    <PackageReference Include="MyJetWallet.Service.Bitgo.WithdrawalProcessor.Client" Version="1.0.0" />
+    <PackageReference Include="MyJetWallet.Service.Bitgo.WithdrawalProcessor.Client" Version="1.0.1" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.PriceSource.Client" Version="1.0.0" />
     <PackageReference Include="MyJetWallet.Service.Registration.Client" Version="1.0.0" />
     <PackageReference Include="MyJetWallet.Service.Service.KYC.Client" Version="1.0.3" />
     <PackageReference Include="MyJetWallet.Service.TradeHistory.Client" Version="1.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NSwag.AspNetCore" Version="13.10.8" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="4.1.1" />
     <PackageReference Include="SimpleTrading.BaseMetrics" Version="1.0.3" />
