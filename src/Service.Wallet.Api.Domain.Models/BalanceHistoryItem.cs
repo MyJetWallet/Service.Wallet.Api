@@ -6,10 +6,12 @@ namespace Service.Wallet.Api.Domain.Models
     {
         public string AssetSymbol { get; set; }
 
-        public decimal Amount { get; set; }
+        public double Amount { get; set; }
 
         public DateTime Timestamp { get; set; }
 
         public BalanceHistoryType Type { get; set; }
+        
+        public long SequenceId { get; set; }
     }
 }

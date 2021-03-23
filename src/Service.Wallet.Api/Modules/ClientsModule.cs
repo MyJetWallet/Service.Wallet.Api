@@ -3,6 +3,7 @@ using MyJetWallet.MatchingEngine.Grpc;
 using MyNoSqlServer.DataReader;
 using Service.ActiveOrders.Client;
 using Service.AssetsDictionary.Client;
+using Service.BalanceHistory.Client;
 using Service.Balances.Client;
 using Service.Bitgo.DepositDetector.Client;
 using Service.Bitgo.WithdrawalProcessor.Client;
@@ -46,6 +47,8 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterBitgoCryptoWithdrawalClient(Program.Settings.BitgoCryptoWithdrawalGrpcServiceUrl);
             
             builder.RegisterKycStatusClients(_myNoSqlClient, Program.Settings.KycGrpcServiceUrl);
+
+            builder.RegisterBalanceHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
             
         }
     }

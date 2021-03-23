@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain.Orders;
 using MyJetWallet.MatchingEngine.Grpc.Api;
+using Service.ActiveOrders.Grpc;
+using Service.ActiveOrders.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
 using Service.Wallet.Api.Domain.Models;
@@ -19,13 +22,15 @@ namespace Service.Wallet.Api.Controllers
     public class TradingController: ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly IActiveOrderService _activeOrderService;
 
         //todo: нужен метод установки лимит ордера на обмен конкретного количества валюты
         //todo: в заявке надо сделать необходимым помимо волума указывать валюту волума, чтоб мы могли фиксировать котируемый или базовый обьем
 
-        public TradingController(IOrderService orderService)
+        public TradingController(IOrderService orderService, IActiveOrderService activeOrderService)
         {
             _orderService = orderService;
+            _activeOrderService = activeOrderService;
         }
 
         /// <summary>
@@ -105,38 +110,24 @@ namespace Service.Wallet.Api.Controllers
             if (wallet == null) throw new WalletApiBadRequestException("request cannot be null");
             var walletId = await HttpContext.GetWalletIdentityAsync(wallet);
 
-            //todo: get order from cache if not exist from service
-
-            var response = new List<SpotOrder>()
+            var orders = await _activeOrderService.GetActiveOrdersAsync(new GetActiveOrdersRequest()
             {
-                new SpotOrder()
-                {
-                    OrderId = OrderIdGenerator.Generate(),
-                    Price = 200.34,
-                    Side = OrderSide.Buy,
-                    Volume = 0.45,
-                    RemainingVolume = 0.1,
-                    InstrumentSymbol = "BTCUSD",
-                    CreatedTime = DateTime.UtcNow.AddHours(-1),
-                    LastUpdate = DateTime.UtcNow.AddMinutes(-10),
-                    Status = OrderStatus.Placed,
-                    Type = OrderType.Limit
-                },
+                WalletId = walletId.WalletId
+            });
 
-                new SpotOrder()
-                {
-                    OrderId = OrderIdGenerator.Generate(),
-                    Price = 200.34,
-                    Side = OrderSide.Sell,
-                    Volume = 2.0,
-                    RemainingVolume = 0,
-                    InstrumentSymbol = "ETHUSD",
-                    CreatedTime = DateTime.UtcNow.AddHours(-1),
-                    LastUpdate = DateTime.UtcNow.AddMinutes(-10),
-                    Status = OrderStatus.Placed,
-                    Type = OrderType.Limit
-                }
-            };
+            var response = orders.Orders.Select(e => new SpotOrder()
+            {
+                OrderId = e.OrderId,
+                Price = e.Price,
+                Side = e.Side,
+                Volume = e.Volume,
+                RemainingVolume = e.RemainingVolume,
+                InstrumentSymbol = e.InstrumentSymbol,
+                CreatedTime = e.CreatedTime,
+                LastUpdate = e.LastUpdate,
+                Status = e.Status,
+                Type = e.Type
+            }).ToList();
 
             return new Response<List<SpotOrder>>(response);
         }

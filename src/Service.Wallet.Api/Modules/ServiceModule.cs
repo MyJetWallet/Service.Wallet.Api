@@ -4,6 +4,7 @@ using Service.Wallet.Api.Domain.Orders;
 using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Hubs;
 using Service.Wallet.Api.Jobs;
+using Service.Wallet.Api.Services;
 
 namespace Service.Wallet.Api.Modules
 {
@@ -57,6 +58,12 @@ namespace Service.Wallet.Api.Modules
             builder
                 .RegisterType<TradeNotificator>()
                 .AsSelf()
+                .AutoActivate()
+                .SingleInstance();
+
+            builder
+                .RegisterType<BlockchainIntegrationService>()
+                .As<IBlockchainIntegrationService>()
                 .AutoActivate()
                 .SingleInstance();
         }

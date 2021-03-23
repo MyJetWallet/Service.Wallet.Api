@@ -37,7 +37,11 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.KycGrpcServiceUrl")]
         public string KycGrpcServiceUrl { get; set; }
+        
         [YamlProperty("WalletApi.BitgoCryptoWithdrawalGrpcServiceUrl")]
         public string BitgoCryptoWithdrawalGrpcServiceUrl { get; set; }
+
+        [YamlProperty("WalletApi.BalanceHistoryGrpcServiceUrl")]
+        public string BalanceHistoryGrpcServiceUrl { get; set; }
     }
 }

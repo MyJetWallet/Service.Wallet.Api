@@ -17,6 +17,7 @@ using Service.Service.KYC.Domain.Models;
 using Service.Service.KYC.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
+using Service.Wallet.Api.Services;
 
 namespace Service.Wallet.Api.Controllers
 {
@@ -26,24 +27,21 @@ namespace Service.Wallet.Api.Controllers
     public class BlockchainController : ControllerBase
     {
         private readonly ILogger<BlockchainController> _logger;
-        private readonly ICryptoWithdrawalService _cryptoWithdrawalService;
+        private readonly IBlockchainIntegrationService _blockchainIntegrationService;
         private readonly IAssetsDictionaryClient _assetsDictionaryClient;
         private readonly IWalletBalanceService _balanceService;
-        private readonly IBitgoDepositAddressService _addressService;
         private readonly IKycStatusClient _kycStatusClient;
 
-        public BlockchainController(ILogger<BlockchainController> logger, 
-            ICryptoWithdrawalService cryptoWithdrawalService,
+        public BlockchainController(ILogger<BlockchainController> logger,
+            IBlockchainIntegrationService blockchainIntegrationService,
             IAssetsDictionaryClient assetsDictionaryClient,
             IWalletBalanceService balanceService,
-            IBitgoDepositAddressService addressService,
             IKycStatusClient kycStatusClient)
         {
             _logger = logger;
-            _cryptoWithdrawalService = cryptoWithdrawalService;
+            _blockchainIntegrationService = blockchainIntegrationService;
             _assetsDictionaryClient = assetsDictionaryClient;
             _balanceService = balanceService;
-            _addressService = addressService;
             _kycStatusClient = kycStatusClient;
         }
 
@@ -82,7 +80,7 @@ namespace Service.Wallet.Api.Controllers
                     throw new WalletApiErrorException("KYC is required", ApiResponseCodes.KycNotPassed);
             }
 
-            var result = await _addressService.GetDepositAddressAsync(new GetDepositAddressRequest()
+            var result = await _blockchainIntegrationService.GetDepositAddressAsync(new GetDepositAddressRequest()
             {
                 BrokerId = walletId.BrokerId,
                 WalletId = walletId.WalletId,
@@ -155,7 +153,7 @@ namespace Service.Wallet.Api.Controllers
 
             // ------- execute ------- 
 
-            var result = await _cryptoWithdrawalService.CryptoWithdrawalAsync(new CryptoWithdrawalRequest()
+            var result = await _blockchainIntegrationService.CryptoWithdrawalAsync(new CryptoWithdrawalRequest()
             {
                 BrokerId = walletId.BrokerId,
                 ClientId = walletId.ClientId,
@@ -200,6 +198,52 @@ namespace Service.Wallet.Api.Controllers
                 OperationId = result.OperationId,
                 TxId = result.TxId,
                 TxUrl = null //todo: сделать мапу урлов в nosql для отсылки на транзакцию
+            });
+        }
+
+        /// <summary>
+        /// execute crypto withdrawal
+        /// </summary>
+        [HttpPost("validate-address")]
+        public async Task<Response<ValidationAddressResponse>> ValidateAddressAsync(ValidationAddressRequest request)
+        {
+            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
+
+            var asset = _assetsDictionaryClient.GetAssetById(new AssetIdentity()
+            {
+                BrokerId = walletId.BrokerId,
+                Symbol = request.AssetSymbol
+            });
+
+            if (asset == null)
+                throw new WalletApiErrorException("Asset do not found", ApiResponseCodes.AssetDoNotFound);
+
+            if (!asset.IsEnabled)
+                throw new WalletApiErrorException("Asset is disabled", ApiResponseCodes.AssetIsDisabled);
+
+
+            var result = await _blockchainIntegrationService.ValidateAddressAsync(new ValidateAddressRequest()
+            {
+                BrokerId = walletId.BrokerId,
+                AssetSymbol = asset.Symbol,
+                Address = request.ToAddress
+            });
+
+            if (result.Error != null)
+            {
+                _logger.LogInformation("Cannot validate address. User: {brokerId}|{clientId}. Request: {jsonText}. Response: {jsonText2}", 
+                    walletId.BrokerId, walletId.ClientId,
+                    JsonSerializer.Serialize(request), JsonSerializer.Serialize(result));
+
+                return new Response<ValidationAddressResponse>(new ValidationAddressResponse()
+                {
+                    IsValid = false
+                });
+            }
+
+            return new Response<ValidationAddressResponse>(new ValidationAddressResponse()
+            {
+                IsValid = result.IsValid
             });
         }
     }

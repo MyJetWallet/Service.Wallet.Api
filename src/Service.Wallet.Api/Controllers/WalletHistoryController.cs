@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyJetWallet.Domain.Assets;
 using MyJetWallet.Domain.Orders;
+using Service.AssetsDictionary.Client;
+using Service.BalanceHistory.Grpc;
+using Service.BalanceHistory.Grpc.Models;
 using Service.TradeHistory.Domain.Models;
 using Service.TradeHistory.Grpc;
 using Service.TradeHistory.Grpc.Models;
@@ -18,64 +24,79 @@ namespace Service.Wallet.Api.Controllers
     public class WalletHistoryController: ControllerBase
     {
         private readonly IWalletTradeService _walletTradeService;
+
+        private readonly IWalletBalanceUpdateService _balanceUpdateService;
+
+        private readonly IAssetsDictionaryClient _assetsDictionaryClient;
         //todo: get order by id
         //todo: get trade by id
 
-        public WalletHistoryController(IWalletTradeService walletTradeService)
+        public WalletHistoryController(IWalletTradeService walletTradeService, IWalletBalanceUpdateService balanceUpdateService, IAssetsDictionaryClient assetsDictionaryClient)
         {
             _walletTradeService = walletTradeService;
+            _balanceUpdateService = balanceUpdateService;
+            _assetsDictionaryClient = assetsDictionaryClient;
         }
 
         [HttpGet("{wallet}/balance-history")]
-        public async Task<Response<List<BalanceHistoryItem>>> GetBalanceHistoryAsync([FromRoute] string wallet, [FromQuery] int take, [FromQuery] DateTime? startTime, [FromQuery] string assetSymbol)
+        public async Task<Response<List<BalanceHistoryItem>>> GetBalanceHistoryAsync([FromRoute] string wallet, [FromQuery][CanBeNull] int? take, [FromQuery] [CanBeNull] long? lastSequenceId, 
+            [FromQuery] [CanBeNull] string assetSymbol)
         {
             var walletId = await HttpContext.GetWalletIdentityAsync(wallet);
 
-
-            var response = new List<BalanceHistoryItem>();
-
-            if (!string.IsNullOrEmpty(assetSymbol))
+            var data = await _balanceUpdateService.GetBalanceUpdatesAsync(new GetBalanceUpdateRequest()
             {
-                response.Add(
-                    new BalanceHistoryItem()
-                    {
-                        AssetSymbol = assetSymbol,
-                        Type = BalanceHistoryType.Deposit,
-                        Amount = 1000m,
-                        Timestamp = DateTime.UtcNow
-                    });
+                Take = take,
+                LastSequenceId = lastSequenceId,
+                Symbol = assetSymbol,
+                WalletId = walletId.WalletId,
+                OnlyBalanceChanged = true
+            });
 
-                response.Add(
-                    new BalanceHistoryItem()
+            var response = data.BalanceUpdates
+                .Select(e =>
+                {
+                    var amount = CalculateAmount(e.NewBalance, e.OldBalance, e.Symbol, walletId.BrokerId);
+                    return new BalanceHistoryItem()
                     {
-                        AssetSymbol = assetSymbol,
-                        Type = BalanceHistoryType.Withdrawal,
-                        Amount = 500m,
-                        Timestamp = DateTime.UtcNow
-                    });
-            }
-            else
-            {
-                response.Add(
-                    new BalanceHistoryItem()
-                    {
-                        AssetSymbol = "USD",
-                        Type = BalanceHistoryType.Deposit,
-                        Amount = 1000m,
-                        Timestamp = DateTime.UtcNow
-                    });
-
-                response.Add(
-                    new BalanceHistoryItem()
-                    {
-                        AssetSymbol = "EUR",
-                        Type = BalanceHistoryType.Withdrawal,
-                        Amount = 500m,
-                        Timestamp = DateTime.UtcNow
-                    });
-            }
+                        AssetSymbol = e.Symbol,
+                        Type = MapEventType(e.EventType, amount > 0),
+                        Amount = amount,
+                        Timestamp = e.Timestamp,
+                        SequenceId = e.SequenceId
+                    };
+                })
+                .ToList();
 
             return new Response<List<BalanceHistoryItem>>(response);
+        }
+
+        private double CalculateAmount(double newBalance, double oldBalance, string symbol, string brokerId)
+        {
+            var asset = _assetsDictionaryClient.GetAssetById(new AssetIdentity()
+            {
+                BrokerId = brokerId,
+                Symbol = symbol
+            });
+
+
+            if (asset == null)
+            {
+                return Math.Round(newBalance - oldBalance, 8);
+            }
+
+            return Math.Round(newBalance - oldBalance, asset.Accuracy);
+        }
+
+        private BalanceHistoryType MapEventType(string eventType, bool isPositive)
+        {
+            if (eventType == "CASH_IN_OUT_OPERATION" && isPositive)
+                return BalanceHistoryType.Deposit;
+
+            if (eventType == "CASH_IN_OUT_OPERATION" && !isPositive)
+                return BalanceHistoryType.Withdrawal;
+
+            return BalanceHistoryType.Trade;
         }
 
         [HttpGet("{wallet}/trade-history")]
