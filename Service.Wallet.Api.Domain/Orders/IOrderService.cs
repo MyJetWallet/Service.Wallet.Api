@@ -114,7 +114,9 @@ namespace Service.Wallet.Api.Domain.Orders
 
                 AssetPairId = symbol,
                 Volume = volumeSign.ToString(CultureInfo.InvariantCulture),
-                WalletVersion = -1
+                WalletVersion = -1,
+                
+                Straight = true
             };
 
             var resp = await _tradingServiceClient.MarketOrderAsync(order);
