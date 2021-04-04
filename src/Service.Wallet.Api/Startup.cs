@@ -18,6 +18,9 @@ using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.DataReader;
 using MyServiceBus.TcpClient;
 using Newtonsoft.Json;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Trace;
 using Prometheus;
 using Service.Wallet.Api.Authentication;
 using Service.Wallet.Api.Hubs;
@@ -79,6 +82,18 @@ namespace Service.Wallet.Api
             services
                 .AddAuthentication(o => { o.DefaultScheme = "Bearer"; })
                 .AddScheme<WalletAuthenticationOptions, WalletAuthHandler>("Bearer", o => { });
+
+            if (!string.IsNullOrEmpty(Program.Settings.ZipkinUrl))
+            {
+                services.AddOpenTelemetryTracing((builder) => builder
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddGrpcClientInstrumentation()
+                    .AddZipkinExporter(options => { options.Endpoint = new Uri(Program.Settings.ZipkinUrl); })
+                );
+                Console.WriteLine($"+++ ZIPKIN is connected +++, {Program.Settings.ZipkinUrl}");
+            }
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

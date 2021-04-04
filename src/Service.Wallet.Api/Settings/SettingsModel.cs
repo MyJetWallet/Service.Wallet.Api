@@ -43,5 +43,8 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.BalanceHistoryGrpcServiceUrl")]
         public string BalanceHistoryGrpcServiceUrl { get; set; }
+
+        [YamlProperty("WalletApi.ZipkinUrl")]
+        public string ZipkinUrl { get; set; }
     }
 }
