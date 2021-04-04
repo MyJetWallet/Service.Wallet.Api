@@ -86,18 +86,20 @@ namespace Service.Wallet.Api
             if (!string.IsNullOrEmpty(Program.Settings.ZipkinUrl))
             {
                 services.AddOpenTelemetryTracing((builder) => builder
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation(options =>
+                    .AddAspNetCoreInstrumentation(options =>
                     {
-                        options.Filter = message =>
+                        options.Filter = context =>
                         {
-                            if (message?.RequestUri?.ToString().Contains("metrics") == true) return false;
-                            if (message?.RequestUri?.ToString().Contains("isalive") == true) return false;
+                            if (context?.Request?.Path.Value?.Contains("metrics") == true) return false;
+                            if (context?.Request?.Path.Value?.Contains("isalive") == true) return false;
+                            if (context?.Request?.Path.Value?.Contains("metrics") == true) return false;
 
                             return true;
                         };
                     })
+                    .AddHttpClientInstrumentation()
                     .AddGrpcClientInstrumentation()
+                    .AddGrpcCoreInstrumentation()
                     .AddZipkinExporter(options => { options.Endpoint = new Uri(Program.Settings.ZipkinUrl); })
                 );
                 Console.WriteLine($"+++ ZIPKIN is connected +++, {Program.Settings.ZipkinUrl}");
