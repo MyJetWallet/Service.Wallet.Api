@@ -87,7 +87,16 @@ namespace Service.Wallet.Api
             {
                 services.AddOpenTelemetryTracing((builder) => builder
                     .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
+                    .AddHttpClientInstrumentation(options =>
+                    {
+                        options.Filter = message =>
+                        {
+                            if (message?.RequestUri?.ToString().Contains("metrics") == true) return false;
+                            if (message?.RequestUri?.ToString().Contains("isalive") == true) return false;
+
+                            return true;
+                        };
+                    })
                     .AddGrpcClientInstrumentation()
                     .AddZipkinExporter(options => { options.Endpoint = new Uri(Program.Settings.ZipkinUrl); })
                 );
