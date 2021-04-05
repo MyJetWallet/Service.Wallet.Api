@@ -121,10 +121,16 @@ namespace Service.Wallet.Api.Domain.Orders
 
             var resp = await _tradingServiceClient.MarketOrderAsync(order);
 
-            if (resp.Status != Status.Ok)
-            {
+            if (resp.Status == Status.LowBalance || resp.Status == Status.NotEnoughFunds)
+                RejectOrder(ApiResponseCodes.LowBalance, resp.Status, resp.StatusReason);
+
+            else if (resp.Status == Status.NoLiquidity)
+                RejectOrder(ApiResponseCodes.NotEnoughLiquidityForMarketOrder, resp.Status, resp.StatusReason);
+
+            else if (resp.Status != Status.Ok)
                 RejectOrder(ApiResponseCodes.InternalServerError, resp.Status, resp.StatusReason);
-            }
+
+
 
             return (order.Id, double.Parse(resp.Price));
         }
@@ -176,11 +182,7 @@ namespace Service.Wallet.Api.Domain.Orders
         
         private void RejectOrder(ApiResponseCodes code, Status? status, string statusReason)
         {
-            _logger.LogError("Cannot register order in ME: {statusText} ({statusReason})", status?.ToString(),
-                statusReason);
-            throw new WalletApiErrorException(
-                $"Cannot register order in ME: {status?.ToString()} ({statusReason})",
-                code);
+            throw new WalletApiErrorException($"Cannot register order in ME: {status?.ToString()} ({statusReason})",  code);
         }
     }
 }

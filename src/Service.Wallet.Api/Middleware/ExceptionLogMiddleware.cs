@@ -31,7 +31,7 @@ namespace Service.Wallet.Api.Middleware
             catch (WalletApiHttpException ex)
             {
                 ex.FailActivity();
-                _logger.LogInformation(ex, "Receive WalletApiHttpException with status code: {StatusCode}; path: {Path}", ex.StatusCode, context.Request.Path);
+                _logger.LogInformation(ex,"Receive WalletApiHttpException with status code: {StatusCode}; path: {Path}", ex.StatusCode, context.Request.Path);
 
                 context.Response.StatusCode = (int) ex.StatusCode;
                 await context.Response.WriteAsJsonAsync(new {ex.Message});
