@@ -24,7 +24,7 @@ namespace Service.Wallet.Api.Jobs
         {
             _hubManager = hubManager;
             _logger = logger;
-            _timer = new MyTaskTimer(nameof(TradeNotificator), TimeSpan.FromMilliseconds(500), logger, DoSendNotifications);
+            _timer = new MyTaskTimer(nameof(TradeNotificator), TimeSpan.FromMilliseconds(500), logger, DoSendNotifications).DisableTelemetry();
             tradeSubscriber.Subscribe(HandleEvent);
         }
 

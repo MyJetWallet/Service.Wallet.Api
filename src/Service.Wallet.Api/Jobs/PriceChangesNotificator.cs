@@ -26,7 +26,7 @@ namespace Service.Wallet.Api.Jobs
         {
             _hubManager = hubManager;
             priceSubscriber.Subscribe(HandlePriceUpdate);
-            _timer = new MyTaskTimer(nameof(PriceChangesNotificator), TimeSpan.FromMilliseconds(TimerDelayMs), logger, DoProcess); 
+            _timer = new MyTaskTimer(nameof(PriceChangesNotificator), TimeSpan.FromMilliseconds(TimerDelayMs), logger, DoProcess).DisableTelemetry(); 
         }
 
         private ValueTask HandlePriceUpdate(IReadOnlyList<BidAsk> prices)

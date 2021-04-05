@@ -28,7 +28,7 @@ namespace Service.Wallet.Api.Jobs
             _hubManager = hubManager;
             _reader = reader;
             _logger = logger;
-            _timer = MyTaskTimer.Create<ActiveOrderNotificator>(TimeSpan.FromMilliseconds(500), logger, DoProcess);
+            _timer = MyTaskTimer.Create<ActiveOrderNotificator>(TimeSpan.FromMilliseconds(500), logger, DoProcess).DisableTelemetry();
             reader.SubscribeToUpdateEvents(HandleUpdate, HandleDelete);
         }
 

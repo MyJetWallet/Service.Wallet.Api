@@ -30,7 +30,7 @@ namespace Service.Wallet.Api.Jobs
             _hubManager = hubManager;
             _logger = logger;
             reader.SubscribeToUpdateEvents(HandleUpdate, HandleDelete);
-            _timer = MyTaskTimer.Create<BalancesNotificator>(TimeSpan.FromMilliseconds(500), logger, DoProcess);
+            _timer = MyTaskTimer.Create<BalancesNotificator>(TimeSpan.FromMilliseconds(500), logger, DoProcess).DisableTelemetry();
         }
 
         private void HandleDelete(IReadOnlyList<WalletBalanceNoSqlEntity> entities)
