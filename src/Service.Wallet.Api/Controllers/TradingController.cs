@@ -76,7 +76,7 @@ namespace Service.Wallet.Api.Controllers
 
             var response = new CreatedOrderResponse()
             {
-                Type = OrderType.Limit,
+                Type = OrderType.Market,
                 OrderId = orderId,
                 OrderPrice = price
             };

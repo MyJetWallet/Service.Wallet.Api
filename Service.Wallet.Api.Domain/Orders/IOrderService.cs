@@ -125,6 +125,9 @@ namespace Service.Wallet.Api.Domain.Orders
 
         private void CheckMeResponse(Status respStatus, string respStatusReason)
         {
+            if (respStatus == Status.LimitOrderNotFound)
+                return;
+
             if (respStatus == Status.LowBalance || respStatus == Status.NotEnoughFunds)
                 RejectOrder(ApiResponseCodes.LowBalance, respStatus, respStatusReason);
 
