@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using MyJetWallet.Domain;
+using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
 using Service.Wallet.Api.Authentication;
 using Service.Wallet.Api.Domain.Contracts;
@@ -163,6 +165,9 @@ namespace Service.Wallet.Api.Controllers
             {
                 throw new WalletApiErrorException("Wallet do not found", ApiResponseCodes.WalletDoNotExist);
             }
+
+            wallet.WalletId.AddToActivityAsTag("walletId");
+            Activity.Current?.AddBaggage("wallet-id", walletId);
 
             return wallet;
         }

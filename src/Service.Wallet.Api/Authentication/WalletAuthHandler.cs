@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Text.Encodings.Web;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyJetWallet.Domain;
+using MyJetWallet.Sdk.Service;
 using Newtonsoft.Json;
 using Service.Registration.Grpc;
 using Service.Registration.Grpc.Models;
@@ -53,6 +55,14 @@ namespace Service.Wallet.Api.Authentication
                 var identity = new GenericIdentity(traderId);
                 identity.AddClaim(new Claim(ClientIdClaim, JsonConvert.SerializeObject(clientId)));
                 var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), this.Scheme.Name);
+
+                brokerId.AddToActivityAsTag("brokerId");
+                traderId.AddToActivityAsTag("clientId");
+                brandId.AddToActivityAsTag("brandId");
+                Activity.Current?.AddBaggage("client-id", traderId);
+                Activity.Current?.AddBaggage("broker-id", brokerId);
+                Activity.Current?.AddBaggage("brand-id", brandId);
+
                 return AuthenticateResult.Success(ticket);
             }
             catch (UnauthorizedAccessException ex)

@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.Sdk.Service;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
 
@@ -29,6 +30,7 @@ namespace Service.Wallet.Api.Middleware
             }
             catch (WalletApiHttpException ex)
             {
+                ex.FailActivity();
                 _logger.LogInformation(ex, "Receive WalletApiHttpException with status code: {StatusCode}; path: {Path}", ex.StatusCode, context.Request.Path);
 
                 context.Response.StatusCode = (int) ex.StatusCode;
@@ -36,6 +38,7 @@ namespace Service.Wallet.Api.Middleware
             }
             catch (WalletApiErrorException ex)
             {
+                ex.FailActivity();
                 _logger.LogInformation(ex, "Receive WalletApiErrorException with status code: {codeText}; path: {Path}", ex.Code.ToString(), context.Request.Path);
 
                 context.Response.StatusCode = (int) HttpStatusCode.OK;
@@ -43,6 +46,7 @@ namespace Service.Wallet.Api.Middleware
             }
             catch (Exception ex)
             {
+                ex.FailActivity();
                 _logger.LogError(ex, ex.Message);
                 throw;
             }
