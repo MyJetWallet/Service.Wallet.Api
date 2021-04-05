@@ -80,10 +80,7 @@ namespace Service.Wallet.Api.Domain.Orders
 
             var resp = await _tradingServiceClient.LimitOrderAsync(order);
 
-            if (resp.Status != Status.Ok)
-            {
-                RejectOrder(ApiResponseCodes.InternalServerError, resp.Status, resp.StatusReason);
-            }
+            CheckMeResponse(resp.Status, resp.StatusReason);
 
             return order.Id;
         }
@@ -121,23 +118,26 @@ namespace Service.Wallet.Api.Domain.Orders
 
             var resp = await _tradingServiceClient.MarketOrderAsync(order);
 
-            if (resp.Status == Status.LowBalance || resp.Status == Status.NotEnoughFunds)
-                RejectOrder(ApiResponseCodes.LowBalance, resp.Status, resp.StatusReason);
-
-            else if (resp.Status == Status.NoLiquidity)
-                RejectOrder(ApiResponseCodes.NotEnoughLiquidityForMarketOrder, resp.Status, resp.StatusReason);
-
-            else if (resp.Status != Status.Ok)
-                RejectOrder(ApiResponseCodes.InternalServerError, resp.Status, resp.StatusReason);
-
-
+            CheckMeResponse(resp.Status, resp.StatusReason);
 
             return (order.Id, double.Parse(resp.Price));
         }
 
+        private void CheckMeResponse(Status respStatus, string respStatusReason)
+        {
+            if (respStatus == Status.LowBalance || respStatus == Status.NotEnoughFunds)
+                RejectOrder(ApiResponseCodes.LowBalance, respStatus, respStatusReason);
+
+            else if (respStatus == Status.NoLiquidity)
+                RejectOrder(ApiResponseCodes.NotEnoughLiquidityForMarketOrder, respStatus, respStatusReason);
+
+            else if (respStatus != Status.Ok)
+                RejectOrder(ApiResponseCodes.InternalServerError, respStatus, respStatusReason);
+        }
+
         public async Task CancelOrderAsync(IJetWalletIdentity walletId, string orderId)
         {
-            await _tradingServiceClient.CancelLimitOrderAsync(new LimitOrderCancel()
+            var resp = await _tradingServiceClient.CancelLimitOrderAsync(new LimitOrderCancel()
             {
                 BrokerId = walletId.BrokerId,
                 AccountId = walletId.ClientId,
@@ -149,6 +149,8 @@ namespace Service.Wallet.Api.Domain.Orders
                 LimitOrderId = {orderId},
                 WalletVersion = -1
             });
+
+            CheckMeResponse(resp.Status, resp.StatusReason);
         }
 
         private void ValidateInstrument(ISpotInstrument spotInstrument)
