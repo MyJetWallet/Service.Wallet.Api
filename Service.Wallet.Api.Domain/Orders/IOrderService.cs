@@ -134,6 +134,9 @@ namespace Service.Wallet.Api.Domain.Orders
             else if (respStatus == Status.NoLiquidity)
                 RejectOrder(ApiResponseCodes.NotEnoughLiquidityForMarketOrder, respStatus, respStatusReason);
 
+            else if (respStatus == Status.InvalidOrderValue)
+                RejectOrder(ApiResponseCodes.InvalidOrderValue, respStatus, respStatusReason);
+
             else if (respStatus != Status.Ok)
                 RejectOrder(ApiResponseCodes.InternalServerError, respStatus, respStatusReason);
         }
