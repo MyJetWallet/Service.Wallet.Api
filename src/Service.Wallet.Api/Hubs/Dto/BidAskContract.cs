@@ -5,7 +5,7 @@ using MyJetWallet.Domain.Prices;
 
 namespace Service.Wallet.Api.Hubs.Dto
 {
-    [SignalrOutcomming(HubNames.AssetList)]
+    [SignalrOutcomming(HubNames.BidAsk + " --> Price")]
     [MessagePackObject]
     public class BidAskContract
     {
