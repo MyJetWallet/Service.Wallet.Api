@@ -24,6 +24,9 @@ namespace Service.Wallet.Api.Domain.Orders
         Task<(string, double)> CreateMarketOrderAsync(IJetWalletIdentity walletId, string symbol, double volume,
             OrderSide side);
 
+        Task<(string, double)> CreateSwapOrderAsync(IJetWalletIdentity walletId, string symbol, double volume,
+            string volumeAssetSymbol, OrderSide side);
+
         Task CancelOrderAsync(IJetWalletIdentity walletId, string orderId);
     }
 
@@ -31,20 +34,22 @@ namespace Service.Wallet.Api.Domain.Orders
     {
         private readonly ITradingServiceClient _tradingServiceClient;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
+        private readonly IAssetsDictionaryClient _assetsDictionaryClient;
         private readonly IKycStatusClient _kycStatusClient;
         private readonly ILogger<OrderService> _logger;
 
         public OrderService(ITradingServiceClient tradingServiceClient,
-            ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient, 
+            IAssetsDictionaryClient assetsDictionaryClient,
+            ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
             IKycStatusClient kycStatusClient,
             ILogger<OrderService> logger)
         {
             _tradingServiceClient = tradingServiceClient;
+            _assetsDictionaryClient = assetsDictionaryClient;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
             _kycStatusClient = kycStatusClient;
             _logger = logger;
         }
-
 
         public async ValueTask<string> CreateLimitOrderAsync(IJetWalletIdentity walletId, string symbol, double price,
             double volume,
@@ -56,6 +61,7 @@ namespace Service.Wallet.Api.Domain.Orders
                 BrokerId = walletId.BrokerId,
                 Symbol = symbol
             });
+
             
             ValidateInstrument(spotInstrument);
             ValidateKyc(spotInstrument, walletId.BrokerId, walletId.ClientId);
@@ -75,7 +81,7 @@ namespace Service.Wallet.Api.Domain.Orders
                 AssetPairId = symbol,
                 Price = price.ToString(CultureInfo.InvariantCulture),
                 Volume = volumeSign.ToString(CultureInfo.InvariantCulture),
-                WalletVersion = -1
+                WalletVersion = -1                
             };
 
             var resp = await _tradingServiceClient.LimitOrderAsync(order);
@@ -94,7 +100,7 @@ namespace Service.Wallet.Api.Domain.Orders
                 BrokerId = walletId.BrokerId,
                 Symbol = symbol
             });
-            
+
             ValidateInstrument(spotInstrument);
             ValidateKyc(spotInstrument, walletId.BrokerId, walletId.ClientId);
 
@@ -122,6 +128,56 @@ namespace Service.Wallet.Api.Domain.Orders
 
             return (order.Id, double.Parse(resp.Price));
         }
+
+        public async Task<(string, double)> CreateSwapOrderAsync(IJetWalletIdentity walletId, string symbol,
+            double volume, string volumeAssetSymbol,
+            OrderSide side)
+        {
+            //todo: add order parameter logical validations
+            var spotInstrument = _spotInstrumentDictionaryClient.GetSpotInstrumentById(new SpotInstrumentIdentity()
+            {
+                BrokerId = walletId.BrokerId,
+                Symbol = symbol
+            });
+
+            var volumeAsset = _assetsDictionaryClient.GetAssetById(new AssetIdentity()
+            {
+                BrokerId = walletId.BrokerId,
+                Symbol = volumeAssetSymbol
+            });
+
+            ValidateAsset(volumeAsset);
+            ValidateInstrument(spotInstrument);
+            ValidateKyc(spotInstrument, walletId.BrokerId, walletId.ClientId);
+
+            var volumeSign = side == OrderSide.Buy ? volume : -volume;
+
+            var order = new MarketOrder()
+            {
+                BrokerId = walletId.BrokerId,
+                AccountId = walletId.ClientId,
+                WalletId = walletId.WalletId,
+
+                Id = Guid.NewGuid().ToString("N"),
+                MessageId = Guid.NewGuid().ToString("N"),
+
+                AssetPairId = spotInstrument.Symbol,
+                Volume = volumeSign.ToString(CultureInfo.InvariantCulture),
+                WalletVersion = -1,
+                Straight = spotInstrument.BaseAsset.Equals(volumeAsset.Symbol)
+            };
+
+            var resp = await _tradingServiceClient.MarketOrderAsync(order);
+
+            if (resp.Status != Status.Ok)
+            {
+                RejectOrder(ApiResponseCodes.InternalServerError, resp.Status, resp.StatusReason);
+            }
+
+            return (order.Id, double.Parse(resp.Price));
+        }
+
+
 
         private void CheckMeResponse(Status respStatus, string respStatusReason)
         {
@@ -172,7 +228,21 @@ namespace Service.Wallet.Api.Domain.Orders
                 RejectOrder(ApiResponseCodes.InvalidInstrument, null, "Disabled instrument.");
             }
         }
-        
+
+        private void ValidateAsset(IAsset asset)
+        {
+            if (asset == null)
+            {
+                RejectOrder(ApiResponseCodes.AssetDoNotFound, null, "Unknown asset.");
+                return;
+            }
+
+            if (!asset.IsEnabled)
+            {
+                RejectOrder(ApiResponseCodes.AssetIsDisabled, null, "Disabled asset.");
+            }
+        }
+
         private void ValidateKyc(ISpotInstrument spotInstrument, string brokerId, string clientId)
         {
             if (!spotInstrument.KycRequiredForTrade) return;
@@ -187,7 +257,7 @@ namespace Service.Wallet.Api.Domain.Orders
                 RejectOrder(ApiResponseCodes.KycNotPassed, null, "KYC not passed.");
             }
         }
-        
+
         private void RejectOrder(ApiResponseCodes code, Status? status, string statusReason)
         {
             throw new WalletApiErrorException($"Cannot register order in ME: {status?.ToString()} ({statusReason})",  code);
