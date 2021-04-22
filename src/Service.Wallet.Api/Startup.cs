@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.DataReader;
 using MyServiceBus.TcpClient;
+using MySettingsReader;
 using Newtonsoft.Json;
 using Prometheus;
 using Service.Wallet.Api.Authentication;
@@ -26,7 +27,6 @@ using Service.Wallet.Api.Modules;
 using Service.Wallet.Api.Settings;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
-using SimpleTrading.SettingsReader;
 
 namespace Service.Wallet.Api
 {
@@ -49,7 +49,7 @@ namespace Service.Wallet.Api
             Configuration = configuration;
 
             _myNoSqlClient = new MyNoSqlTcpClient(
-                () => SettingsReader.ReadSettings<SettingsModel>(Program.SettingsFileName).MyNoSqlReaderHostPort,
+                Program.ReloadedSettings(e => e.MyNoSqlReaderHostPort),
                 ApplicationEnvironment.HostName ?? $"{ApplicationEnvironment.AppName}:{ApplicationEnvironment.AppVersion}");
 
             _serviceBusClient = new MyServiceBusTcpClient(Program.ReloadedSettings(model => model.SpotServiceBusHostPort), ApplicationEnvironment.HostName);
