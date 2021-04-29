@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain.Assets;
 using Service.AssetsDictionary.Client;
+using Service.Authorization.Client.Http;
 using Service.Balances.Grpc;
 using Service.Bitgo.DepositDetector.Domain.Models;
 using Service.Bitgo.DepositDetector.Grpc;
@@ -54,7 +55,7 @@ namespace Service.Wallet.Api.Controllers
         [HttpPost("generate-deposit-address")]
         public async Task<Response<GenerateDepositAddressResponse>> GenerateDepositAddressAsync(GenerateDepositAddressRequest request)
         {
-            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
+            var walletId = this.GetWalletIdentity();
 
             _logger.LogInformation("Receive Generate deposit address. User: {brokerId}|{clientId}. Request: {jsonText}",
                 walletId.BrokerId, walletId.ClientId, JsonSerializer.Serialize(request));
@@ -114,7 +115,7 @@ namespace Service.Wallet.Api.Controllers
         [HttpPost("withdrawal")]
         public async Task<Response<WithdrawalResponse>> WithdrawalAsync(WithdrawalRequest request)
         {
-            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
+            var walletId = this.GetWalletIdentity();
 
             var requestId = request.RequestId ?? Guid.NewGuid().ToString("N");
 
@@ -220,7 +221,7 @@ namespace Service.Wallet.Api.Controllers
         [HttpPost("validate-address")]
         public async Task<Response<ValidationAddressResponse>> ValidateAddressAsync(ValidationAddressRequest request)
         {
-            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
+            var walletId = this.GetWalletIdentity();
 
             var assetIdentity = new AssetIdentity()
             {

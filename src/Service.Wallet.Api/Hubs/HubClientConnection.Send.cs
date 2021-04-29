@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
 using MyJetWallet.Domain.Orders;
 using MyJetWallet.Domain.Prices;
-using Newtonsoft.Json;
 using Service.ActiveOrders.Grpc.Models;
 using Service.Balances.Domain.Models;
 using Service.Balances.Grpc;
@@ -41,7 +40,7 @@ namespace Service.Wallet.Api.Hubs
 
             await SendAsync(HubNames.AssetList, message);
 
-            _logger.LogInformation("[HUB] Send asset list. WalletId: {walletId}; Data: {jsonText}", WalletId, JsonConvert.SerializeObject(message));
+            //_logger.LogInformation("[HUB] Send asset list. WalletId: {walletId}; Data: {jsonText}", WalletId, JsonConvert.SerializeObject(message));
         }
 
         public async Task SendWalletSpotInstrumentsAsync()

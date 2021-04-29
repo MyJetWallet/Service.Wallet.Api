@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Service.Authorization.Client.Http;
 using Service.Balances.Domain.Models;
 using Service.Balances.Grpc;
 using Service.Balances.Grpc.Models;
@@ -32,7 +33,7 @@ namespace Service.Wallet.Api.Controllers
         {
             if (string.IsNullOrEmpty(walletId)) throw new WalletApiBadRequestException("walletId is required");
 
-            var wallet = await HttpContext.GetWalletIdentityAsync(walletId);
+            var wallet = this.GetWalletIdentity();
 
             var data = await _balanceService.GetWalletBalancesAsync(new GetWalletBalancesRequest()
             {

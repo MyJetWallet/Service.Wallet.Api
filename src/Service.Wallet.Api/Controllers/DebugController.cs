@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Service.Authorization.Client.Http;
+using SimpleTrading.TokensManager;
+using SimpleTrading.TokensManager.Tokens;
 
 namespace Service.Wallet.Api.Controllers
 {
@@ -33,6 +37,28 @@ namespace Service.Wallet.Api.Controllers
         {
             var traderId = User.Identity.Name;
             return Ok($"Hello {traderId}");
+        }
+
+        [HttpGet("who")]
+        [Authorize()]
+        public IActionResult Who()
+        {
+            var walletId = this.GetWalletIdentity();
+            return Ok(walletId);
+        }
+
+        [HttpGet("token-generate")]
+        public IActionResult GenerateBaseToken([FromQuery] string clientId, [FromQuery] int timeLifeMinutes)
+        {
+            var token = new AuthorizationToken()
+            {
+                Id = clientId,
+                Expires = DateTime.UtcNow.AddMinutes(timeLifeMinutes)
+            };
+
+            var result = token.IssueTokenAsBase64String(Startup.SessionEncodingKey);
+
+            return Ok(result);
         }
     }
 }

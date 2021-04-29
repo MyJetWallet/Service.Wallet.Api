@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyJetWallet.Domain.Assets;
 using MyJetWallet.Domain.Orders;
 using Service.AssetsDictionary.Client;
+using Service.Authorization.Client.Http;
 using Service.BalanceHistory.Grpc;
 using Service.BalanceHistory.Grpc.Models;
 using Service.TradeHistory.Domain.Models;
@@ -42,7 +43,7 @@ namespace Service.Wallet.Api.Controllers
         public async Task<Response<List<BalanceHistoryItem>>> GetBalanceHistoryAsync([FromRoute] string wallet, [FromQuery][CanBeNull] int? take, [FromQuery] [CanBeNull] long? lastSequenceId, 
             [FromQuery] [CanBeNull] string assetSymbol)
         {
-            var walletId = await HttpContext.GetWalletIdentityAsync(wallet);
+            var walletId = this.GetWalletIdentity();
 
             var data = await _balanceUpdateService.GetBalanceUpdatesAsync(new GetBalanceUpdateRequest()
             {
@@ -102,7 +103,7 @@ namespace Service.Wallet.Api.Controllers
         [HttpGet("{wallet}/trade-history")]
         public async Task<Response<List<WalletTrade>>> GetTradeHistory([FromRoute] string wallet, [FromQuery] string instrumentSymbol, [FromQuery] int? take, [FromQuery] long? lastSequenceId)
         {
-            var walletId = await HttpContext.GetWalletIdentityAsync(wallet);
+            var walletId = this.GetWalletIdentity();
 
             var data = await _walletTradeService.GetTradesAsync(new GetTradesRequest()
             {

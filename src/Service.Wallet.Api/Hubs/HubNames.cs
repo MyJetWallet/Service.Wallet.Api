@@ -23,11 +23,6 @@
         public const string Init = "Init";
 
         /// <summary>
-        /// [incoming] Set wallet to the connection
-        /// </summary>
-        public const string SetWallet = "SetWallet";
-
-        /// <summary>
         /// List of available wallets
         /// </summary>
         public const string WalletList = "wallet-list";

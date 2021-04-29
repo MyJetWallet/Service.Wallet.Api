@@ -49,5 +49,11 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.ElkLogs")]
         public LogElkSettings ElkLogs { get; set; }
+
+        [YamlProperty("WalletApi.AuthorizationGrpcServiceUrl")]
+        public string AuthorizationGrpcServiceUrl { get; set; }
+
+        [YamlProperty("WalletApi.BrokerId")]
+        public string BrokerId { get; set; }
     }
 }

@@ -9,6 +9,7 @@ using MyJetWallet.Domain.Orders;
 using MyJetWallet.MatchingEngine.Grpc.Api;
 using Service.ActiveOrders.Grpc;
 using Service.ActiveOrders.Grpc.Models;
+using Service.Authorization.Client.Http;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
 using Service.Wallet.Api.Domain.Models;
@@ -44,8 +45,8 @@ namespace Service.Wallet.Api.Controllers
             if (request.Price <= 0) throw new WalletApiBadRequestException("price cannot be zero or negative");
             if (string.IsNullOrEmpty(request.InstrumentSymbol)) throw new WalletApiBadRequestException("InstrumentSymbol cannot be empty");
 
-            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
-
+            var walletId = this.GetWalletIdentity();
+                
             var orderId = await _orderService.CreateLimitOrderAsync(walletId, request.InstrumentSymbol, request.Price, request.Volume, request.Side);
 
             var response = new CreatedOrderResponse()
@@ -68,7 +69,7 @@ namespace Service.Wallet.Api.Controllers
             if (request.Volume <= 0) throw new WalletApiBadRequestException("volume cannot be zero or negative");
             if (string.IsNullOrEmpty(request.InstrumentSymbol)) throw new WalletApiBadRequestException("InstrumentSymbol cannot be empty");
 
-            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
+            var walletId = this.GetWalletIdentity();
 
             //todo: exec create order for walletId
 
@@ -92,7 +93,7 @@ namespace Service.Wallet.Api.Controllers
         {
             if (request == null) throw new WalletApiBadRequestException("request cannot be null");
 
-            var walletId = await HttpContext.GetWalletIdentityAsync(request.WalletId);
+            var walletId = this.GetWalletIdentity();
 
             //todo: cancel order
 
@@ -108,7 +109,7 @@ namespace Service.Wallet.Api.Controllers
         public async Task<Response<List<SpotOrder>>> GetActiveOrdersAsync([FromRoute] string wallet)
         {
             if (wallet == null) throw new WalletApiBadRequestException("request cannot be null");
-            var walletId = await HttpContext.GetWalletIdentityAsync(wallet);
+            var walletId = this.GetWalletIdentity();
 
             var orders = await _activeOrderService.GetActiveOrdersAsync(new GetActiveOrdersRequest()
             {
