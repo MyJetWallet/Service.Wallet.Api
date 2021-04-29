@@ -29,6 +29,7 @@ namespace Service.Wallet.Api.Jobs
             _reader = reader;
             _logger = logger;
             _timer = MyTaskTimer.Create<ActiveOrderNotificator>(TimeSpan.FromMilliseconds(500), logger, DoProcess).DisableTelemetry();
+
             reader.SubscribeToUpdateEvents(HandleUpdate, HandleDelete);
         }
 
@@ -81,6 +82,8 @@ namespace Service.Wallet.Api.Jobs
                 _logger.LogDebug("Active order updates. Count: {count}, Time: {ElapsedMilliseconds} ms",
                     countSent, sw.ElapsedMilliseconds);
             }
+
+            _logger.LogDebug("Active Order Count: {count}", _reader.Count());
         }
 
         private Dictionary<string, string> GetChanges()
