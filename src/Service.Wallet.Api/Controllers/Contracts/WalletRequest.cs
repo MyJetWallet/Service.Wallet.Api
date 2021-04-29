@@ -2,6 +2,6 @@
 {
     public class WalletRequest
     {
-        public string WalletId { get; set; }
+        
     }
 }

@@ -102,7 +102,7 @@ namespace TestApp
 
             await connection.StartAsync();
 
-            await connection.SendAsync(HubNames.Init, "alex");
+            await connection.SendAsync(HubNames.Init, "HcVVLHyEj+4Tn9W5RHJKXxxzxA98nTuJ+QXbacvuT8aGYMpLNtA/kEp6TqcRxnlPmAgQt+tzZw3fBcFQ7IielOOe86odGBO5FGvfnspxxcr8yOiFUl6dfPgltXFOp3LJKV06FMp3B4Xq3R8BR3mW+faJ+oqvG5pYaATbQDokslX9AKqM3hrw5z+/N0uEvhV6");
 
             var run = true;
 
