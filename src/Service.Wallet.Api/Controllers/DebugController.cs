@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Service.Authorization.Client.Http;
 using SimpleTrading.TokensManager;
 using SimpleTrading.TokensManager.Tokens;
@@ -19,9 +20,11 @@ namespace Service.Wallet.Api.Controllers
         [HttpPost("token/{token}")]
         public IActionResult ParseToken([FromRoute] string token)
         {
-            var result = token.PrintToken();
+            var (res, data) = MyControllerBaseHelper.ParseToken(token);
 
-            return Ok(result);
+            var json = JsonConvert.SerializeObject(data, Formatting.Indented);
+
+            return Ok($"Result: {res}.\nData:\n{json}");
         }
 
         [HttpGet("hello")]
