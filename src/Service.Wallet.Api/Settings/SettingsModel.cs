@@ -20,8 +20,8 @@ namespace Service.Wallet.Api.Settings
         [YamlProperty("WalletApi.RegistrationGrpcServiceUrl")]
         public string RegistrationGrpcServiceUrl { get; set; }
 
-        [YamlProperty("WalletApi.MatchingEngine.TradingGrpcServiceUrl")]
-        public string MatchingEngineTradingGrpcServiceUrl { get; set; }
+        [YamlProperty("WalletApi.MatchingEngineApiGrpcServiceUrl")]
+        public string MatchingEngineApiGrpcServiceUrl { get; set; }
 
         [YamlProperty("WalletApi.BalancesGrpcServiceUrl")]
         public string BalancesGrpcServiceUrl { get; set; }
@@ -37,23 +37,20 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.KycGrpcServiceUrl")]
         public string KycGrpcServiceUrl { get; set; }
-        
+
         [YamlProperty("WalletApi.BitgoCryptoWithdrawalGrpcServiceUrl")]
         public string BitgoCryptoWithdrawalGrpcServiceUrl { get; set; }
 
         [YamlProperty("WalletApi.BalanceHistoryGrpcServiceUrl")]
         public string BalanceHistoryGrpcServiceUrl { get; set; }
 
-        [YamlProperty("WalletApi.ZipkinUrl")]
-        public string ZipkinUrl { get; set; }
+        [YamlProperty("WalletApi.ZipkinUrl")] public string ZipkinUrl { get; set; }
 
-        [YamlProperty("WalletApi.ElkLogs")]
-        public LogElkSettings ElkLogs { get; set; }
+        [YamlProperty("WalletApi.ElkLogs")] public LogElkSettings ElkLogs { get; set; }
 
         [YamlProperty("WalletApi.AuthorizationGrpcServiceUrl")]
         public string AuthorizationGrpcServiceUrl { get; set; }
 
-        [YamlProperty("WalletApi.BrokerId")]
-        public string BrokerId { get; set; }
+        [YamlProperty("WalletApi.BrokerId")] public string BrokerId { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using MyJetWallet.MatchingEngine.Grpc;
 using MyNoSqlServer.DataReader;
 using Service.ActiveOrders.Client;
 using Service.AssetsDictionary.Client;
@@ -9,6 +8,7 @@ using Service.Balances.Client;
 using Service.Bitgo.DepositDetector.Client;
 using Service.Bitgo.WithdrawalProcessor.Client;
 using Service.ClientWallets.Client;
+using Service.MatchingEngine.Api.Client;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Registration.Client;
 using Service.Service.KYC.Client;
@@ -16,7 +16,7 @@ using Service.TradeHistory.Client;
 
 namespace Service.Wallet.Api.Modules
 {
-    public class ClientsModule: Module
+    public class ClientsModule : Module
     {
         private readonly MyNoSqlTcpClient _myNoSqlClient;
 
@@ -37,7 +37,7 @@ namespace Service.Wallet.Api.Modules
 
             builder.RegisterClientRegistrationClient(_myNoSqlClient, Program.Settings.RegistrationGrpcServiceUrl);
 
-            builder.RegisterMatchingEngineGrpcClient(tradingServiceGrpcUrl: Program.Settings.MatchingEngineTradingGrpcServiceUrl);
+            builder.RegisterMatchingEngineApiClient(Program.Settings.MatchingEngineApiGrpcServiceUrl);
 
             builder.RegisterBalancesClients(Program.Settings.BalancesGrpcServiceUrl, _myNoSqlClient);
 
@@ -45,17 +45,17 @@ namespace Service.Wallet.Api.Modules
 
             builder.RegisterTradeHistoryClient(Program.Settings.TradeHistoryGrpcServiceUrl);
 
-            builder.RegisterBitgoDepositAddressClient(Program.Settings.BitgoDepositDetectorGrpcServiceUrl, _myNoSqlClient);
+            builder.RegisterBitgoDepositAddressClient(Program.Settings.BitgoDepositDetectorGrpcServiceUrl,
+                _myNoSqlClient);
 
             builder.RegisterBitgoCryptoWithdrawalClient(Program.Settings.BitgoCryptoWithdrawalGrpcServiceUrl);
-            
+
             builder.RegisterKycStatusClients(_myNoSqlClient, Program.Settings.KycGrpcServiceUrl);
 
             builder.RegisterBalanceHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
-         
+
             builder.RegisterAuthorizationClient(Program.Settings.AuthorizationGrpcServiceUrl);
             builder.RegisterAuthorizationSessionCache(_myNoSqlClient);
-
         }
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using ME.Contracts.Api;
 using ME.Contracts.Api.IncomingMessages;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
 using MyJetWallet.Domain.Assets;
 using MyJetWallet.Domain.Orders;
-using MyJetWallet.MatchingEngine.Grpc.Api;
 using Service.AssetsDictionary.Client;
 using Service.AssetsDictionary.Domain.Models;
 using Service.Service.KYC.Client;
@@ -32,13 +32,13 @@ namespace Service.Wallet.Api.Domain.Orders
 
     public class OrderService : IOrderService
     {
-        private readonly ITradingServiceClient _tradingServiceClient;
+        private readonly TradingService.TradingServiceClient _tradingServiceClient;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
         private readonly IAssetsDictionaryClient _assetsDictionaryClient;
         private readonly IKycStatusClient _kycStatusClient;
         private readonly ILogger<OrderService> _logger;
 
-        public OrderService(ITradingServiceClient tradingServiceClient,
+        public OrderService(TradingService.TradingServiceClient tradingServiceClient,
             IAssetsDictionaryClient assetsDictionaryClient,
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
             IKycStatusClient kycStatusClient,
