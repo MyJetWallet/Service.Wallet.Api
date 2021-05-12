@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Grpc.Net.Client" Version="2.37.0" />
     <PackageReference Include="protobuf-net.Grpc" Version="1.0.152" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.6" />
   </ItemGroup>
 
   <ItemGroup>

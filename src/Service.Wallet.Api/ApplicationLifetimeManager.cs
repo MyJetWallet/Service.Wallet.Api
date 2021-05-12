@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
+using MyNoSqlServer.DataReader;
 using Service.Registration.Grpc;
 using Service.Wallet.Api.Controllers;
 using Service.Wallet.Api.Domain.Wallets;
@@ -14,18 +15,21 @@ namespace Service.Wallet.Api
         private readonly ActiveOrderNotificator _activeOrderNotificator;
         private readonly BalancesNotificator _balancesNotificator;
         private readonly TradeNotificator _tradeNotificator;
+        private readonly MyNoSqlTcpClient _myNoSqlTcpClient;
 
         public ApplicationLifetimeManager(IHostApplicationLifetime appLifetime, ILogger<ApplicationLifetimeManager> logger,
             ActiveOrderNotificator activeOrderNotificator,
             BalancesNotificator balancesNotificator,
             TradeNotificator tradeNotificator,
-            IWalletService walletService)
+            IWalletService walletService,
+            MyNoSqlTcpClient myNoSqlTcpClient)
             : base(appLifetime)
         {
             _logger = logger;
             _activeOrderNotificator = activeOrderNotificator;
             _balancesNotificator = balancesNotificator;
             _tradeNotificator = tradeNotificator;
+            _myNoSqlTcpClient = myNoSqlTcpClient;
 
             // init static locator to implement helper - Get wallet
             ControllerUtils.WalletService = walletService;
@@ -34,6 +38,7 @@ namespace Service.Wallet.Api
         protected override void OnStarted()
         {
             _logger.LogInformation("OnStarted has been called.");
+            _myNoSqlTcpClient.Start();
             _activeOrderNotificator.Start();
             _balancesNotificator.Start();
             _tradeNotificator.Start();
@@ -45,6 +50,7 @@ namespace Service.Wallet.Api
             _activeOrderNotificator.Stop();
             _balancesNotificator.Stop();
             _tradeNotificator.Stop();
+            _myNoSqlTcpClient.Stop();
         }
 
         protected override void OnStopped()

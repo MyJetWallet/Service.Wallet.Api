@@ -33,7 +33,7 @@ namespace Service.Wallet.Api
 {
     public class Startup
     {
-        private readonly MyNoSqlTcpClient _myNoSqlClient;
+        //private readonly MyNoSqlTcpClient _myNoSqlClient;
         private readonly MyServiceBusTcpClient _serviceBusClient;
         private const string SessionEncodingKeyEnv = "SESSION_ENCODING_KEY";
         private const string EnvInfo = "ENV_INFO";
@@ -49,9 +49,7 @@ namespace Service.Wallet.Api
         {
             Configuration = configuration;
 
-            _myNoSqlClient = new MyNoSqlTcpClient(
-                Program.ReloadedSettings(e => e.MyNoSqlReaderHostPort),
-                ApplicationEnvironment.HostName ?? $"{ApplicationEnvironment.AppName}:{ApplicationEnvironment.AppVersion}");
+            
 
             _serviceBusClient = new MyServiceBusTcpClient(Program.ReloadedSettings(model => model.SpotServiceBusHostPort), ApplicationEnvironment.HostName);
         }
@@ -151,8 +149,6 @@ namespace Service.Wallet.Api
 
             app.UseFileServer();
 
-
-            _myNoSqlClient.Start();
             _serviceBusClient.Start();
         }
 
@@ -212,7 +208,7 @@ namespace Service.Wallet.Api
         {
             builder.RegisterModule<SettingsModule>();
             builder.RegisterModule<ServiceModule>();
-            builder.RegisterModule(new ClientsModule(_myNoSqlClient));
+            builder.RegisterModule(new ClientsModule());
             builder.RegisterModule(new ServiceBusModule(_serviceBusClient));
         }
 
