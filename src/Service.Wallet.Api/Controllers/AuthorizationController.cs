@@ -1,7 +1,10 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
+using Grpc.Core.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Service.Authorization.Client.Http;
 using Service.Authorization.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
@@ -16,15 +19,19 @@ namespace Service.Wallet.Api.Controllers
     public class AuthorizationController : ControllerBase
     {
         private readonly IAuthorizationService _authorizationService;
+        private readonly ILogger<AuthorizationController> _logger;
 
-        public AuthorizationController(IAuthorizationService authorizationService)
+        public AuthorizationController(IAuthorizationService authorizationService, ILogger<AuthorizationController> logger)
         {
             _authorizationService = authorizationService;
+            _logger = logger;
         }
 
         [HttpPost("authorization")]
         public async Task<Response<string>> AuthorizationAsync(AuthorizationRequest request)
         {
+            _logger.LogInformation("Authorization Request: {requestJson}", JsonConvert.SerializeObject(request));
+
             var response = await _authorizationService.AuthorizationAsync(new Authorization.Grpc.Models.AuthorizationRequest()
             {
                 BrandId = "default-brand",
