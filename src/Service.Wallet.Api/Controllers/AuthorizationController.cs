@@ -30,7 +30,11 @@ namespace Service.Wallet.Api.Controllers
         [HttpPost("authorization")]
         public async Task<Response<string>> AuthorizationAsync(AuthorizationRequest request)
         {
-            _logger.LogInformation("Authorization Request: {requestJson}", JsonConvert.SerializeObject(request));
+            if (string.IsNullOrEmpty(request.AuthToken) || string.IsNullOrEmpty(request.PublicKeyPem))
+            {
+                _logger.LogInformation("Authorization Bad Request: {requestJson}", JsonConvert.SerializeObject(request));
+                throw new WalletApiHttpException("Authorization Fail", HttpStatusCode.Unauthorized);
+            }
 
             var response = await _authorizationService.AuthorizationAsync(new Authorization.Grpc.Models.AuthorizationRequest()
             {
