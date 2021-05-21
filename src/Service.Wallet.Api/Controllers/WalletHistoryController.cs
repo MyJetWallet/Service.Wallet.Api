@@ -39,7 +39,7 @@ namespace Service.Wallet.Api.Controllers
             _assetsDictionaryClient = assetsDictionaryClient;
         }
 
-        [HttpGet("{wallet}/balance-history")]
+        [HttpGet("balance-history")]
         public async Task<Response<List<BalanceHistoryItem>>> GetBalanceHistoryAsync([FromQuery][CanBeNull] int? take, [FromQuery] [CanBeNull] long? lastSequenceId, 
             [FromQuery] [CanBeNull] string assetSymbol)
         {
@@ -100,7 +100,7 @@ namespace Service.Wallet.Api.Controllers
             return BalanceHistoryType.Trade;
         }
 
-        [HttpGet("{wallet}/trade-history")]
+        [HttpGet("trade-history")]
         public async Task<Response<List<WalletTrade>>> GetTradeHistory([FromQuery] string instrumentSymbol, [FromQuery] int? take, [FromQuery] long? lastSequenceId)
         {
             var walletId = this.GetWalletIdentity();
