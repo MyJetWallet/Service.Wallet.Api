@@ -40,7 +40,7 @@ namespace Service.Wallet.Api.Controllers
         }
 
         [HttpGet("{wallet}/balance-history")]
-        public async Task<Response<List<BalanceHistoryItem>>> GetBalanceHistoryAsync([FromRoute] string wallet, [FromQuery][CanBeNull] int? take, [FromQuery] [CanBeNull] long? lastSequenceId, 
+        public async Task<Response<List<BalanceHistoryItem>>> GetBalanceHistoryAsync([FromQuery][CanBeNull] int? take, [FromQuery] [CanBeNull] long? lastSequenceId, 
             [FromQuery] [CanBeNull] string assetSymbol)
         {
             var walletId = this.GetWalletIdentity();
@@ -101,7 +101,7 @@ namespace Service.Wallet.Api.Controllers
         }
 
         [HttpGet("{wallet}/trade-history")]
-        public async Task<Response<List<WalletTrade>>> GetTradeHistory([FromRoute] string wallet, [FromQuery] string instrumentSymbol, [FromQuery] int? take, [FromQuery] long? lastSequenceId)
+        public async Task<Response<List<WalletTrade>>> GetTradeHistory([FromQuery] string instrumentSymbol, [FromQuery] int? take, [FromQuery] long? lastSequenceId)
         {
             var walletId = this.GetWalletIdentity();
 

@@ -29,15 +29,13 @@ namespace Service.Wallet.Api.Controllers
         /// Get balances by walletId
         /// </summary>
         [HttpGet("wallet-balances")]
-        public async Task<Response<WalletBalancesMessage>> GetBalances([FromQuery, Required(AllowEmptyStrings = false, ErrorMessage = "walletId is required")] string walletId)
+        public async Task<Response<WalletBalancesMessage>> GetBalances()
         {
-            if (string.IsNullOrEmpty(walletId)) throw new WalletApiBadRequestException("walletId is required");
-
             var wallet = this.GetWalletIdentity();
 
             var data = await _balanceService.GetWalletBalancesAsync(new GetWalletBalancesRequest()
             {
-                WalletId = walletId
+                WalletId = wallet.WalletId
             });
 
             return new Response<WalletBalancesMessage>(new WalletBalancesMessage()

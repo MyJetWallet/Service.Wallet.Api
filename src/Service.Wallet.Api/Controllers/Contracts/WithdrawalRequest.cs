@@ -4,8 +4,6 @@
     {
         public string RequestId { get; set; }
 
-        public string WalletId { get; set; }
-
         public string AssetSymbol { get; set; }
 
         public double Amount { get; set; }
