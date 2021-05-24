@@ -9,6 +9,7 @@ using Service.Balances.Client;
 using Service.Bitgo.DepositDetector.Client;
 using Service.Bitgo.WithdrawalProcessor.Client;
 using Service.ClientWallets.Client;
+using Service.Liquidity.Converter.Client;
 using Service.MatchingEngine.Api.Client;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Registration.Client;
@@ -55,6 +56,8 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterKycStatusClients(myNoSqlClient, Program.Settings.KycGrpcServiceUrl);
 
             builder.RegisterBalanceHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
+            
+            builder.RegisterLiquidityConverterClient(Program.Settings.LiquidityConverterGrpcServiceUrl);
 
             builder.RegisterAuthorizationClient(Program.Settings.AuthorizationGrpcServiceUrl);
             builder.RegisterAuthorizationSessionCache(myNoSqlClient);
