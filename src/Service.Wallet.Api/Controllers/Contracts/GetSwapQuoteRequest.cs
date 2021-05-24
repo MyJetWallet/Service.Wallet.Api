@@ -5,12 +5,18 @@ namespace Service.Wallet.Api.Controllers.Contracts
 {
     public class GetSwapQuoteRequest : WalletRequest
     {
-        public string InstrumentSymbol { get; set; }
+        public string FromAsset { get; set; }
+
+        public string ToAsset { get; set; }
+
+        public double? FromAssetVolume { get; set; }
         
-        public string AssetSymbol { get; set; }
+        public double? ToAssetVolume { get; set; }
 
-        public OrderSide Side { get; set; }
-
-        public double Volume { get; set; }
+        /// <summary>
+        /// true = from filled
+        /// false = to filled
+        /// </summary>
+        public bool IsFromFixed { get; set; }
     }
 }
