@@ -10,6 +10,7 @@
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.0.3" />
   </ItemGroup>
 
 </Project>

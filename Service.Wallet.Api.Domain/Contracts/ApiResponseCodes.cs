@@ -18,6 +18,8 @@ namespace Service.Wallet.Api.Domain.Contracts
         KycNotPassed = 10,
         AssetDoNotSupported = 11,
         NotEnoughLiquidityForMarketOrder = 12,
-        InvalidOrderValue = 13
+        InvalidOrderValue = 13,
+        CannotProcessQuoteRequest = 14,
+        CannotExecuteQuoteRequest = 15,
     }
 }
