@@ -26,7 +26,7 @@
     <PackageReference Include="MyJetWallet.Service.Authorization.Client" Version="1.0.9" />
     <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="1.6.1" />
     <PackageReference Include="MyJetWallet.Service.Balances.Client" Version="1.0.7" />
-    <PackageReference Include="MyJetWallet.Service.BaseCurrencyConverter.Client" Version="1.0.0" />
+    <PackageReference Include="MyJetWallet.Service.BaseCurrencyConverter.Client" Version="1.0.1" />
     <PackageReference Include="MyJetWallet.Service.Bitgo.DepositDetector.Client" Version="1.1.2" />
     <PackageReference Include="MyJetWallet.Service.Bitgo.WithdrawalProcessor.Client" Version="1.0.1" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.Api.Client" Version="1.0.2" />
