@@ -84,11 +84,11 @@ namespace Service.Wallet.Api.Jobs
             }
 
 
-            var statistics = _reader.Get().GroupBy(e => e.PartitionKey).Select(g => new {Key = g.Key, Count = g.Count()}).ToList();
-            foreach (var stat in statistics)
-            {
-                _logger.LogDebug("Active Order Count: {key} = {count}", stat.Key, stat.Count);
-            }
+            //var statistics = _reader.Get().GroupBy(e => e.PartitionKey).Select(g => new {Key = g.Key, Count = g.Count()}).ToList();
+            //foreach (var stat in statistics)
+            //{
+            //    _logger.LogDebug("Active Order Count: {key} = {count}", stat.Key, stat.Count);
+            //}
         }
 
         private Dictionary<string, string> GetChanges()
