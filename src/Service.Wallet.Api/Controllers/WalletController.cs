@@ -7,6 +7,9 @@ using Service.Authorization.Client.Http;
 using Service.Balances.Domain.Models;
 using Service.Balances.Grpc;
 using Service.Balances.Grpc.Models;
+using Service.BaseCurrencyConverter.Domain.Models;
+using Service.BaseCurrencyConverter.Grpc;
+using Service.BaseCurrencyConverter.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
 using Service.Wallet.Api.Hubs.Dto;
@@ -19,10 +22,12 @@ namespace Service.Wallet.Api.Controllers
     public class WalletController : ControllerBase
     {
         private readonly IWalletBalanceService _balanceService;
+        private readonly IBaseCurrencyConverterService _baseCurrencyConverterService;
 
-        public WalletController(IWalletBalanceService balanceService)
+        public WalletController(IWalletBalanceService balanceService, IBaseCurrencyConverterService baseCurrencyConverterService)
         {
             _balanceService = balanceService;
+            _baseCurrencyConverterService = baseCurrencyConverterService;
         }
 
         /// <summary>
@@ -42,6 +47,26 @@ namespace Service.Wallet.Api.Controllers
             {
                 Balances = data.Balances ?? new List<WalletBalance>()
             });
+        }
+
+        /// <summary>
+        /// Get balances by walletId
+        /// </summary>
+        [HttpGet("base-currency-converter-map/{baseAssetSymbol}")]
+        public async Task<Response<BaseAssetConvertMap>> GetBaseCurrencyConverterMapAsync([FromRoute] string baseAssetSymbol)
+        {
+            var wallet = this.GetWalletIdentity();
+
+            var data = await _baseCurrencyConverterService.GetConvertorMapToBaseCurrencyAsync(
+                new GetConvertorMapToBaseCurrencyRequest()
+                {
+                    BaseAsset = baseAssetSymbol,
+                    BrokerId = wallet.BrokerId
+                });
+
+            
+
+            return new Response<BaseAssetConvertMap>(data);
         }
     }
 }

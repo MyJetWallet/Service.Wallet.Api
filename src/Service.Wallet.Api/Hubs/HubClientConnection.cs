@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
 using Service.ActiveOrders.Grpc;
 using Service.Balances.Grpc;
+using Service.BaseCurrencyConverter.Grpc;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Wallet.Api.Controllers;
 using Service.Wallet.Api.Domain.Assets;

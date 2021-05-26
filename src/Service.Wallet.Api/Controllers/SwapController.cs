@@ -10,10 +10,14 @@ using MyJetWallet.Domain.Orders;
 using Service.AssetsDictionary.Client;
 using Service.AssetsDictionary.Domain.Models;
 using Service.Authorization.Client.Http;
+using Service.Liquidity.Converter.Domain.Models;
+using Service.Liquidity.Converter.Grpc;
 using Service.Liquidity.Converter.Grpc.Models;
+using Service.Service.KYC.Client;
+using Service.Service.KYC.Domain.Models;
+using Service.Service.KYC.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
-using Service.Wallet.Api.Domain.Swaps;
 
 namespace Service.Wallet.Api.Controllers
 {
@@ -22,13 +26,15 @@ namespace Service.Wallet.Api.Controllers
     [Route("/api/v1/swap")]
     public class SwapController : ControllerBase
     {
-        private readonly ISwapService _swapService;
-        private readonly ISpotInstrumentDictionaryClient _instrumentDictionary;
+        private readonly IQuoteService _quoteService;
+        private readonly IAssetsDictionaryClient _assetsDictionary;
+        private readonly IKycStatusClient _kycStatusClient;
 
-        public SwapController(ISwapService swapService, ISpotInstrumentDictionaryClient instrumentDictionary)
+        public SwapController(IQuoteService quoteService, IAssetsDictionaryClient assetsDictionary, IKycStatusClient kycStatusClient)
         {
-            _swapService = swapService;
-            _instrumentDictionary = instrumentDictionary;
+            _quoteService = quoteService;
+            _assetsDictionary = assetsDictionary;
+            _kycStatusClient = kycStatusClient;
         }
 
         /// <summary>
@@ -57,61 +63,63 @@ namespace Service.Wallet.Api.Controllers
                 throw new WalletApiBadRequestException("ToAsset cannot be empty");
 
             var walletId = this.GetWalletIdentity();
-            
-            var instrument = SelectInstrument(request.FromAsset, request.ToAsset, walletId);
 
-            if (instrument == null)
+            var fromAsset = _assetsDictionary.GetAssetsByBrand(walletId).FirstOrDefault(e => e.Symbol == request.FromAsset);
+            var toAsset = _assetsDictionary.GetAssetsByBrand(walletId).FirstOrDefault(e => e.Symbol == request.ToAsset);
+
+            if (fromAsset == null || toAsset == null || !fromAsset.IsEnabled || !toAsset.IsEnabled)
+                throw new WalletApiBadRequestException("FromAsset or ToAsset do not found");
+
+            //todo: https://monfex.atlassian.net/browse/SPOTDEV-227
+            if (fromAsset.KycRequiredForDeposit || toAsset.KycRequiredForDeposit)
             {
-                throw new WalletApiErrorException("Cannot find way to convert assets",  ApiResponseCodes.NoqEnoughLiquidityForConvert);
-            }
-
-            Quote quote = null;
-
-            if (request.FromAssetVolume.HasValue)
-            {
-                quote = await _swapService.GetSwapQuoteAsync(walletId, instrument.Symbol,
-                    request.FromAsset, request.FromAssetVolume.Value, OrderSide.Sell);
-
-                var response = new GetSwapQuoteResponse()
+                var kycStatus = _kycStatusClient.GetClientKycStatus(new KycStatusRequest()
                 {
-                    FromAsset = request.FromAsset,
-                    ToAsset = request.ToAsset,
+                    BrokerId = walletId.BrokerId,
+                    ClientId = walletId.ClientId
+                });
 
-                    OperationId = quote.OperationId,
-                    Price = quote.Price,
-
-                    ActualTimeInSecond = (int)(quote.ExpireTime - DateTime.UtcNow).TotalSeconds,
-
-                    FromAssetVolume = quote.Volume,
-                    ToAssetVolume = quote.OppositeVolume
-                };
-
-                return new Response<GetSwapQuoteResponse>(response);
-            }
-            else
-            {
-#pragma warning disable 8629
-                quote = await _swapService.GetSwapQuoteAsync(walletId, instrument.Symbol, request.FromAsset, request.ToAssetVolume.Value, OrderSide.Buy);
-#pragma warning restore 8629
-
-                var response = new GetSwapQuoteResponse()
+                if (kycStatus.Status != KycStatus.Verified)
                 {
-                    FromAsset = request.FromAsset,
-                    ToAsset = request.ToAsset,
-
-                    OperationId = quote.OperationId,
-                    Price = quote.Price,
-
-                    ActualTimeInSecond = (int)(quote.ExpireTime - DateTime.UtcNow).TotalSeconds,
-
-                    FromAssetVolume = quote.OppositeVolume,
-                    ToAssetVolume = quote.Volume
-                };
-
-                return new Response<GetSwapQuoteResponse>(response);
+                    throw new WalletApiErrorException("KYC required ", ApiResponseCodes.KycNotPassed);
+                }
             }
 
-            throw new WalletApiErrorException("Cannot process quote request", ApiResponseCodes.NoqEnoughLiquidityForConvert);
+            var quoteResponse = await _quoteService.GetQuoteAsync(new GetQuoteRequest()
+            {
+                WalletId = walletId.WalletId,
+                AccountId = walletId.ClientId,
+                BrokerId = walletId.BrokerId,
+                FromAsset = fromAsset.Symbol,
+                ToAsset = toAsset.Symbol,
+                FromAssetVolume = request.FromAssetVolume ?? 0.0,
+                ToAssetVolume = request.ToAssetVolume ?? 0.0,
+                IsFromFixed = request.IsFromFixed
+            });
+
+            if (!quoteResponse.IsSuccess || quoteResponse.Data == null)
+            {
+                throw new WalletApiErrorException("Can not get quote for convert", ApiResponseCodes.CannotExecuteQuoteRequest);
+            }
+
+
+            var response = new GetSwapQuoteResponse()
+            {
+                FromAsset = request.FromAsset,
+                ToAsset = request.ToAsset,
+
+                OperationId = quoteResponse.Data.OperationId,
+                Price = quoteResponse.Data.Price,
+
+                ActualTimeInSecond = (int)(quoteResponse.Data.ExpireDate - DateTime.UtcNow).TotalSeconds,
+
+                FromAssetVolume = quoteResponse.Data.FromAssetVolume,
+                ToAssetVolume = quoteResponse.Data.ToAssetVolume,
+
+                IsFromFixed = quoteResponse.Data.IsFromFixed
+            };
+
+            return new Response<GetSwapQuoteResponse>(response);
         }
 
         /// <summary>
@@ -134,30 +142,47 @@ namespace Service.Wallet.Api.Controllers
             
             var walletId = this.GetWalletIdentity();
 
-            //todo: прокинуть параметры в конвертор чтоб там их даблчекнуть
-            var (executed, quote) = await _swapService.ExecuteSwapQuoteAsync(walletId, request.OperationId);
+            var quoteResponse = await _quoteService.ExecuteQuoteAsync(new ExecuteQuoteRequest()
+            {
+                WalletId = walletId.WalletId,
+                AccountId = walletId.ClientId,
+                BrokerId = walletId.BrokerId,
+                FromAsset = request.FromAsset,
+                ToAsset = request.ToAsset,
+                FromAssetVolume = request.FromAssetVolume,
+                ToAssetVolume = request.ToAssetVolume,
+                IsFromFixed = request.IsFromFixed,
+                OperationId = request.OperationId,
+                Price = request.Price
+            });
+            
+
+            if (quoteResponse.QuoteExecutionResult == QuoteExecutionResult.Error)
+            {
+                throw new WalletApiErrorException(quoteResponse.ErrorMessage, ApiResponseCodes.CannotExecuteQuoteRequest);
+            }
+
 
             var response = new ExecuteSwapQuoteResponse()
             {
-                IsExecuted = executed,
+                IsExecuted = quoteResponse.QuoteExecutionResult == QuoteExecutionResult.Success,
 
-                //todo: заполнить респонс квотой
-                
+                FromAsset = quoteResponse.Data.FromAsset,
+                ToAsset = quoteResponse.Data.ToAsset,
+
+                OperationId = quoteResponse.Data.OperationId,
+                Price = quoteResponse.Data.Price,
+
+                ActualTimeInSecond = (int)(quoteResponse.Data.ExpireDate - DateTime.UtcNow).TotalSeconds,
+
+                FromAssetVolume = quoteResponse.Data.FromAssetVolume,
+                ToAssetVolume = quoteResponse.Data.ToAssetVolume,
+
+                IsFromFixed = quoteResponse.Data.IsFromFixed
             };
 
             return new Response<ExecuteSwapQuoteResponse>(response);
-        }
 
-
-        private ISpotInstrument? SelectInstrument(string fromAsset, string toAsset, IJetBrandIdentity brand)
-        {
-            var instruments = _instrumentDictionary.GetSpotInstrumentByBrand(brand);
-
-            ISpotInstrument? instrument = instruments.FirstOrDefault(e =>
-                e.BaseAsset == fromAsset && e.QuoteAsset == toAsset ||
-                e.BaseAsset == toAsset && e.QuoteAsset == fromAsset);
-
-            return instrument;
         }
     }
 }

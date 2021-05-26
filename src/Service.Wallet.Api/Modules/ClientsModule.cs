@@ -6,6 +6,7 @@ using Service.AssetsDictionary.Client;
 using Service.Authorization.Client;
 using Service.BalanceHistory.Client;
 using Service.Balances.Client;
+using Service.BaseCurrencyConverter.Client;
 using Service.Bitgo.DepositDetector.Client;
 using Service.Bitgo.WithdrawalProcessor.Client;
 using Service.ClientWallets.Client;
@@ -61,6 +62,8 @@ namespace Service.Wallet.Api.Modules
 
             builder.RegisterAuthorizationClient(Program.Settings.AuthorizationGrpcServiceUrl);
             builder.RegisterAuthorizationSessionCache(myNoSqlClient);
+
+            builder.RegisterBaseCurrencyConverterClient(Program.Settings.BaseCurrencyConverterGrpcServiceUrl, myNoSqlClient);
         }
     }
 }

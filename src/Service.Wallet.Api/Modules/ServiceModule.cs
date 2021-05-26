@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using Service.Wallet.Api.Domain.Assets;
 using Service.Wallet.Api.Domain.Orders;
-using Service.Wallet.Api.Domain.Swaps;
 using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Hubs;
 using Service.Wallet.Api.Jobs;
@@ -43,11 +42,7 @@ namespace Service.Wallet.Api.Modules
                 .RegisterType<OrderService>()
                 .As<IOrderService>()
                 .SingleInstance();
-
-            builder
-                .RegisterType<SwapService>()
-                .As<ISwapService>()
-                .SingleInstance();
+            
 
             builder
                 .RegisterType<BalancesNotificator>()

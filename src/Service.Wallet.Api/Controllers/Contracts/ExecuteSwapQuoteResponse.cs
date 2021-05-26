@@ -16,5 +16,7 @@ namespace Service.Wallet.Api.Controllers.Contracts
         public double ToAssetVolume { get; set; }
 
         public bool IsFromFixed { get; set; }
+
+        public int ActualTimeInSecond { get; set; }
     }
 }

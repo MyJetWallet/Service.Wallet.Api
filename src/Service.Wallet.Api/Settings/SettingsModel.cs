@@ -54,6 +54,10 @@ namespace Service.Wallet.Api.Settings
         [YamlProperty("WalletApi.AuthorizationGrpcServiceUrl")]
         public string AuthorizationGrpcServiceUrl { get; set; }
 
-        [YamlProperty("WalletApi.BrokerId")] public string BrokerId { get; set; }
+        [YamlProperty("WalletApi.BrokerId")] 
+        public string BrokerId { get; set; }
+
+        [YamlProperty("WalletApi.BaseCurrencyConverterGrpcServiceUrl")]
+        public string BaseCurrencyConverterGrpcServiceUrl { get; set; }
     }
 }
