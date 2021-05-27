@@ -12,7 +12,7 @@ namespace Service.Wallet.Api.Domain.Models.Assets
         public AvailabilityMode WithdrawalMode { get; set; }
         public TagType TagType { get; set; }
 
-        public static WalletAsset Create(IAsset asset)
+        public static WalletAsset Create(IAsset asset, bool cryptoDepositEnable, bool cryptoWithdrawalEnable)
         {
             
             return new WalletAsset()
@@ -20,8 +20,8 @@ namespace Service.Wallet.Api.Domain.Models.Assets
                 Symbol = asset.Symbol,
                 Accuracy = asset.Accuracy,
                 Description = asset.Description,
-                DepositMode = asset.IsEnabled ? AvailabilityMode.Enabled : AvailabilityMode.Disabled,
-                WithdrawalMode = asset.IsEnabled ? AvailabilityMode.Enabled : AvailabilityMode.Disabled,
+                DepositMode = cryptoDepositEnable ? AvailabilityMode.Enabled : AvailabilityMode.Disabled,
+                WithdrawalMode = cryptoWithdrawalEnable ? AvailabilityMode.Enabled : AvailabilityMode.Disabled,
                 TagType = GetTagType(asset.Symbol),
             };
         }

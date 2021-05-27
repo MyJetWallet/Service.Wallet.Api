@@ -44,10 +44,14 @@ namespace Service.Wallet.Api.Hubs
         public async Task ExecForeachConnection(Func<HubClientConnection, Task> func)
         {
             var list = _hubConnections.GetAll();
+            var taskList = new List<Task>(list.Count);
+
             foreach (var connection in list)
             {
-                await func.Invoke(connection);
+                taskList.Add(func.Invoke(connection));
             }
+
+            await Task.WhenAll(taskList);
         }
 
         public IEnumerable<HubClientConnection> TryGetContextByWalletId(string walletId)

@@ -16,9 +16,9 @@ namespace TestApp
             Console.ReadLine();
 
             var connection = new HubConnectionBuilder()
-                //.WithUrl("http://localhost:8080/signalr")
+                .WithUrl("http://localhost:8080/signalr")
                 //.WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
-                .WithUrl("https://wallet-api-spot.mnftx.biz/signalr")
+                //.WithUrl("https://wallet-api-spot.mnftx.biz/signalr")
                 //.WithUrl("http://20.50.189.25:8080/signalr")
                 //.AddMessagePackProtocol()
                 .Build();
@@ -102,7 +102,7 @@ namespace TestApp
 
             await connection.StartAsync();
 
-            await connection.SendAsync(HubNames.Init, "HcVVLHyEj+4Tn9W5RHJKXxxzxA98nTuJ+QXbacvuT8aGYMpLNtA/kEp6TqcRxnlPmAgQt+tzZw3fBcFQ7IielOOe86odGBO5FGvfnspxxcr8yOiFUl6dfPgltXFOp3LJKV06FMp3B4Xq3R8BR3mW+faJ+oqvG5pYaATbQDokslX9AKqM3hrw5z+/N0uEvhV6");
+            await connection.SendAsync(HubNames.Init, "bneE572Me31P5mxFVNraWdnmtvecdUwa3e6DWKu5GdNxgCOR1CqrQUBRlC84CsYrv+mYj5wQGLS9q2PFqWDstJJjVbzpoj8QIPbrNJIrXphqErRLQU0IlCMYtNyma+sqs23F8ufK07cpW4+pxnCOOMPvz5KQfb7042BbQgKX4oehLGruKxi8ksaiwPzW8PLB");
 
             var run = true;
 

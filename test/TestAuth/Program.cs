@@ -19,7 +19,21 @@ namespace TestAuth
                 Password = "q12345678"
             });
 
-            Console.WriteLine(regResp.ToJson());
+            if (regResp.Result != OperationApiResponseCodes.Ok)
+            {
+                Console.WriteLine("Cannot register client");
+                Console.WriteLine(regResp.ToJson());
+                return;
+            }
+
+            var token = regResp.Data.Token;
+            var refreshToken = regResp.Data.RefreshToken;
+
+            Console.WriteLine($"Token: {token}");
+            Console.WriteLine($"RefreshToken: {refreshToken}");
+
+
+
         }
     }
 

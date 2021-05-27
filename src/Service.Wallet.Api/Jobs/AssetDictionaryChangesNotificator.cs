@@ -2,7 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
+using Microsoft.Extensions.Logging;
+using MyJetWallet.Sdk.Service.Tools;
 using Service.AssetsDictionary.Client;
+using Service.Wallet.Api.Domain.Assets;
 using Service.Wallet.Api.Hubs;
 
 namespace Service.Wallet.Api.Jobs
@@ -10,51 +13,50 @@ namespace Service.Wallet.Api.Jobs
     public class AssetDictionaryChangesNotificator: IStartable
     {
         private readonly IHubManager _hubManager;
-        private Timer _timer;
+        private readonly ILogger<AssetDictionaryChangesNotificator> _logger;
+        private MyTaskTimer _timer;
         private bool _isAssetChanged = false;
         private bool _isSpotInstrumentChanged = false;
 
         public AssetDictionaryChangesNotificator(
             IHubManager hubManager,
-            IAssetsDictionaryClient assetsDictionaryClient,
-            ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient)
+            IAssetService assetService,
+            ILogger<AssetDictionaryChangesNotificator> logger)
         {
             _hubManager = hubManager;
-            assetsDictionaryClient.OnChanged += AssetChanged;
-            spotInstrumentDictionaryClient.OnChanged += SpotInstrumentChanged;
+            _logger = logger;
+            assetService.SubscribeToChanges(Changed);
         }
 
-        private void AssetChanged()
+        private void Changed()
         {
-            _hubManager.ExecForeachConnection(async connection => { await connection.SendWalletAssetsAsync(); }).GetAwaiter().GetResult();
-            //_isAssetChanged = true;
-        }
-
-        private void SpotInstrumentChanged()
-        {
-            _hubManager.ExecForeachConnection(async connection => { await connection.SendWalletSpotInstrumentsAsync(); }).GetAwaiter().GetResult();
-            //_isSpotInstrumentChanged = true;
+            _isAssetChanged = true;
+            _isSpotInstrumentChanged = true;
         }
 
         public void Start()
         {
-            _timer = new Timer(DoTime, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+            _timer = new MyTaskTimer(nameof(AssetDictionaryChangesNotificator),TimeSpan.FromSeconds(1), _logger, DoTime)
+            {
+                IsTelemetryActive = false
+            };
+            _timer.Start();
         }
 
-        private void DoTime(object state)
+        private async Task DoTime()
         {
             if (_isAssetChanged)
             {
                 _isAssetChanged = false;
 
-                _hubManager.ExecForeachConnection(async connection => { await connection.SendWalletAssetsAsync(); }).GetAwaiter().GetResult();
+                await _hubManager.ExecForeachConnection(async connection => { await connection.SendWalletAssetsAsync(); });
             }
 
             if (_isSpotInstrumentChanged)
             {
                 _isSpotInstrumentChanged = false;
 
-                _hubManager.ExecForeachConnection(async connection => { await connection.SendWalletSpotInstrumentsAsync(); }).GetAwaiter().GetResult();
+                await _hubManager.ExecForeachConnection(async connection => { await connection.SendWalletSpotInstrumentsAsync(); });
             }
         }
     }
