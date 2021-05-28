@@ -77,7 +77,7 @@ namespace Service.Wallet.Api
 
             services.AddAuthenticationJetWallet();
 
-            services.AddMyTelemetry(Program.Settings.ZipkinUrl);
+            services.AddMyTelemetry("SP-", Program.Settings.ZipkinUrl);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
