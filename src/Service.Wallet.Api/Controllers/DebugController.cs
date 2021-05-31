@@ -1,8 +1,17 @@
 ﻿using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Web;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MyJetWallet.Domain;
+using MyJetWallet.Sdk.Authorization;
+using MyJetWallet.Sdk.Authorization.Http;
+using MyTcpSockets.Extensions;
 using Newtonsoft.Json;
-using Service.Authorization.Client.Http;
+using Service.Wallet.Api.Controllers.Contracts;
 using SimpleTrading.TokensManager;
 using SimpleTrading.TokensManager.Tokens;
 
@@ -17,10 +26,10 @@ namespace Service.Wallet.Api.Controllers
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        [HttpPost("token/{token}")]
-        public IActionResult ParseToken([FromRoute] string token)
+        [HttpPost("token")]
+        public IActionResult ParseToken([FromBody] TokenDto request)
         {
-            var (res, data) = MyControllerBaseHelper.ParseToken(token);
+            var (res, data) = MyControllerBaseHelper.ParseToken(request.Token);
 
             var json = JsonConvert.SerializeObject(data, Formatting.Indented);
 
@@ -38,7 +47,7 @@ namespace Service.Wallet.Api.Controllers
         [Authorize()]
         public IActionResult TestAuth()
         {
-            var traderId = User.Identity.Name;
+            var traderId = this.GetClientId();
             return Ok($"Hello {traderId}");
         }
 
@@ -46,22 +55,40 @@ namespace Service.Wallet.Api.Controllers
         [Authorize()]
         public IActionResult Who()
         {
-            var walletId = this.GetWalletIdentity();
-            return Ok(walletId);
+            var clientId = this.GetClientId();
+            var brokerId = this.GetBrokerId();
+            var brandId = this.GetBrandId();
+            return Ok(new JetClientIdentity(brokerId, brandId, clientId));
         }
 
-        [HttpGet("token-generate")]
-        public IActionResult GenerateBaseToken([FromQuery] string clientId, [FromQuery] int timeLifeMinutes)
+        [HttpPost("make-signature")]
+        public IActionResult MakeSignatureAsync([FromBody] TokenDto data, [FromHeader(Name = "private-key")] string key)
         {
-            var token = new AuthorizationToken()
+            return Ok();
+        }
+
+        [HttpPost("generate-keys")]
+        public IActionResult GenerateKeysAsync()
+        {
+            var rsa = RSA.Create();
+
+            var publicKey = rsa.ExportRSAPublicKey();
+            var privateKey = rsa.ExportRSAPrivateKey();
+
+            var response = new
             {
-                Id = clientId,
-                Expires = DateTime.UtcNow.AddMinutes(timeLifeMinutes)
+                PrivateKeyBase64 = Convert.ToBase64String(privateKey),
+                PublicKeyBase64 = Convert.ToBase64String(publicKey)
             };
 
-            var result = token.IssueTokenAsBase64String(Startup.SessionEncodingKey);
+            return Ok(response);
+        }
 
-            return Ok(result);
+        [HttpPost("validate-signature")]
+        [Authorize]
+        public IActionResult ValidateSignatureAsync([FromBody] TokenDto data, [FromHeader(Name = AuthorizationConst.SignatureHeader)] string signature)
+        {
+            return Ok();
         }
     }
 }

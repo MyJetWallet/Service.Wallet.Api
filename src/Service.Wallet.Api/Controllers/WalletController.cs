@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyJetWallet.Sdk.Service;
-using Service.Authorization.Client.Http;
 using Service.Balances.Domain.Models;
 using Service.Balances.Grpc;
 using Service.Balances.Grpc.Models;
@@ -13,6 +12,7 @@ using Service.BaseCurrencyConverter.Grpc;
 using Service.BaseCurrencyConverter.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
+using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Hubs.Dto;
 
 namespace Service.Wallet.Api.Controllers
@@ -24,11 +24,13 @@ namespace Service.Wallet.Api.Controllers
     {
         private readonly IWalletBalanceService _balanceService;
         private readonly IBaseCurrencyConverterService _baseCurrencyConverterService;
+        private readonly IWalletService _walletService;
 
-        public WalletController(IWalletBalanceService balanceService, IBaseCurrencyConverterService baseCurrencyConverterService)
+        public WalletController(IWalletBalanceService balanceService, IBaseCurrencyConverterService baseCurrencyConverterService, IWalletService walletService)
         {
             _balanceService = balanceService;
             _baseCurrencyConverterService = baseCurrencyConverterService;
+            _walletService = walletService;
         }
 
         /// <summary>
@@ -37,8 +39,9 @@ namespace Service.Wallet.Api.Controllers
         [HttpGet("wallet-balances")]
         public async Task<Response<WalletBalancesMessage>> GetBalances()
         {
-            var wallet = this.GetWalletIdentity();
-
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+            
             var data = await _balanceService.GetWalletBalancesAsync(new GetWalletBalancesRequest()
             {
                 WalletId = wallet.WalletId
@@ -58,13 +61,14 @@ namespace Service.Wallet.Api.Controllers
         {
             baseAssetSymbol.AddToActivityAsTag("baseAssetSymbol");
 
-            var wallet = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
 
             var data = await _baseCurrencyConverterService.GetConvertorMapToBaseCurrencyAsync(
                 new GetConvertorMapToBaseCurrencyRequest()
                 {
                     BaseAsset = baseAssetSymbol,
-                    BrokerId = wallet.BrokerId
+                    BrokerId = clientId.BrokerId
                 });
 
             

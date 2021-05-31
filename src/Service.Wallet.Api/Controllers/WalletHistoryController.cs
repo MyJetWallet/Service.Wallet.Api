@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using MyJetWallet.Domain.Assets;
 using MyJetWallet.Domain.Orders;
 using Service.AssetsDictionary.Client;
-using Service.Authorization.Client.Http;
 using Service.BalanceHistory.Grpc;
 using Service.BalanceHistory.Grpc.Models;
 using Service.TradeHistory.Domain.Models;
@@ -16,6 +15,7 @@ using Service.TradeHistory.Grpc;
 using Service.TradeHistory.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Models;
+using Service.Wallet.Api.Domain.Wallets;
 
 namespace Service.Wallet.Api.Controllers
 {
@@ -29,35 +29,40 @@ namespace Service.Wallet.Api.Controllers
         private readonly IWalletBalanceUpdateService _balanceUpdateService;
 
         private readonly IAssetsDictionaryClient _assetsDictionaryClient;
+
+        private readonly IWalletService _walletService;
         //todo: get order by id
         //todo: get trade by id
 
-        public WalletHistoryController(IWalletTradeService walletTradeService, IWalletBalanceUpdateService balanceUpdateService, IAssetsDictionaryClient assetsDictionaryClient)
+        public WalletHistoryController(IWalletTradeService walletTradeService, IWalletBalanceUpdateService balanceUpdateService, IAssetsDictionaryClient assetsDictionaryClient,
+            IWalletService walletService)
         {
             _walletTradeService = walletTradeService;
             _balanceUpdateService = balanceUpdateService;
             _assetsDictionaryClient = assetsDictionaryClient;
+            _walletService = walletService;
         }
 
         [HttpGet("balance-history")]
         public async Task<Response<List<BalanceHistoryItem>>> GetBalanceHistoryAsync([FromQuery][CanBeNull] int? take, [FromQuery] [CanBeNull] long? lastSequenceId, 
             [FromQuery] [CanBeNull] string assetSymbol)
         {
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
 
             var data = await _balanceUpdateService.GetBalanceUpdatesAsync(new GetBalanceUpdateRequest()
             {
                 Take = take,
                 LastSequenceId = lastSequenceId,
                 Symbol = assetSymbol,
-                WalletId = walletId.WalletId,
+                WalletId = wallet.WalletId,
                 OnlyBalanceChanged = true
             });
 
             var response = data.BalanceUpdates
                 .Select(e =>
                 {
-                    var amount = CalculateAmount(e.NewBalance, e.OldBalance, e.Symbol, walletId.BrokerId);
+                    var amount = CalculateAmount(e.NewBalance, e.OldBalance, e.Symbol, clientId.BrokerId);
                     return new BalanceHistoryItem()
                     {
                         AssetSymbol = e.Symbol,
@@ -103,11 +108,12 @@ namespace Service.Wallet.Api.Controllers
         [HttpGet("trade-history")]
         public async Task<Response<List<WalletTrade>>> GetTradeHistory([FromQuery] string instrumentSymbol, [FromQuery] int? take, [FromQuery] long? lastSequenceId)
         {
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
 
             var data = await _walletTradeService.GetTradesAsync(new GetTradesRequest()
             {
-                WalletId = walletId.WalletId,
+                WalletId = wallet.WalletId,
                 Take = take,
                 LastSequenceId = lastSequenceId,
                 Symbol = instrumentSymbol

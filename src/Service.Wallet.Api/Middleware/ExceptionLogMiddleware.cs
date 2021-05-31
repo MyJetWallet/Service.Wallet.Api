@@ -1,9 +1,14 @@
 ﻿using System;
+using System.IO;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Service;
+using MyTcpSockets.Extensions;
+using Newtonsoft.Json;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
 
@@ -50,6 +55,56 @@ namespace Service.Wallet.Api.Middleware
                 _logger.LogError(ex, ex.Message);
                 throw;
             }
+        }
+
+    }
+
+    public class DebugMiddleware
+    {
+        private readonly RequestDelegate _next;
+
+        public DebugMiddleware(RequestDelegate next)
+        {
+            _next = next;
+        }
+
+        public async Task InvokeAsync(HttpContext context)
+        {
+            if (context.Request.Path == "/api/Debug/make-signature" && context.Request.Method == "POST")
+            {
+                var request = context.Request;
+
+                if (!context.Request.Headers.TryGetValue("private-key", out var key))
+                {
+                    context.Response.StatusCode = 400;
+                    return;
+                }
+
+                string bodyStr;
+                using (StreamReader reader = new StreamReader(request.Body, Encoding.UTF8, true, 1024, true))
+                {
+                    bodyStr = await reader.ReadToEndAsync();
+                    Console.WriteLine(bodyStr);
+
+                    var rsa = RSA.Create(2048);
+
+                    rsa.ImportRSAPrivateKey(Convert.FromBase64String(key), out _);
+
+                    var signature = rsa.SignData(Encoding.UTF8.GetBytes(bodyStr), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+
+                    var response = new
+                    {
+                        Signature = Convert.ToBase64String(signature)
+                    };
+
+                    await context.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(response)));
+                }
+
+
+                return;
+            }
+
+            await _next(context);
         }
 
     }

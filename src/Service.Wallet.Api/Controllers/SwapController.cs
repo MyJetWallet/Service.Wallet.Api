@@ -4,13 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using MyJetWallet.Domain;
-using MyJetWallet.Domain.Orders;
 using Service.AssetsDictionary.Client;
-using Service.AssetsDictionary.Domain.Models;
-using Service.Authorization.Client.Http;
-using Service.Liquidity.Converter.Domain.Models;
 using Service.Liquidity.Converter.Grpc;
 using Service.Liquidity.Converter.Grpc.Models;
 using Service.Service.KYC.Client;
@@ -18,6 +12,7 @@ using Service.Service.KYC.Domain.Models;
 using Service.Service.KYC.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
+using Service.Wallet.Api.Domain.Wallets;
 
 namespace Service.Wallet.Api.Controllers
 {
@@ -29,12 +24,14 @@ namespace Service.Wallet.Api.Controllers
         private readonly IQuoteService _quoteService;
         private readonly IAssetsDictionaryClient _assetsDictionary;
         private readonly IKycStatusClient _kycStatusClient;
+        private readonly IWalletService _walletService;
 
-        public SwapController(IQuoteService quoteService, IAssetsDictionaryClient assetsDictionary, IKycStatusClient kycStatusClient)
+        public SwapController(IQuoteService quoteService, IAssetsDictionaryClient assetsDictionary, IKycStatusClient kycStatusClient, IWalletService walletService)
         {
             _quoteService = quoteService;
             _assetsDictionary = assetsDictionary;
             _kycStatusClient = kycStatusClient;
+            _walletService = walletService;
         }
 
         /// <summary>
@@ -62,10 +59,11 @@ namespace Service.Wallet.Api.Controllers
             if (string.IsNullOrEmpty(request.ToAsset))
                 throw new WalletApiBadRequestException("ToAsset cannot be empty");
 
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var walletId = await _walletService.GetDefaultWalletAsync(clientId);
 
-            var fromAsset = _assetsDictionary.GetAssetsByBrand(walletId).FirstOrDefault(e => e.Symbol == request.FromAsset);
-            var toAsset = _assetsDictionary.GetAssetsByBrand(walletId).FirstOrDefault(e => e.Symbol == request.ToAsset);
+            var fromAsset = _assetsDictionary.GetAssetsByBrand(clientId).FirstOrDefault(e => e.Symbol == request.FromAsset);
+            var toAsset = _assetsDictionary.GetAssetsByBrand(clientId).FirstOrDefault(e => e.Symbol == request.ToAsset);
 
             if (fromAsset == null || toAsset == null || !fromAsset.IsEnabled || !toAsset.IsEnabled)
                 throw new WalletApiBadRequestException("FromAsset or ToAsset do not found");
@@ -75,8 +73,8 @@ namespace Service.Wallet.Api.Controllers
             {
                 var kycStatus = _kycStatusClient.GetClientKycStatus(new KycStatusRequest()
                 {
-                    BrokerId = walletId.BrokerId,
-                    ClientId = walletId.ClientId
+                    BrokerId = clientId.BrokerId,
+                    ClientId = clientId.ClientId
                 });
 
                 if (kycStatus.Status != KycStatus.Verified)
@@ -88,8 +86,8 @@ namespace Service.Wallet.Api.Controllers
             var quoteResponse = await _quoteService.GetQuoteAsync(new GetQuoteRequest()
             {
                 WalletId = walletId.WalletId,
-                AccountId = walletId.ClientId,
-                BrokerId = walletId.BrokerId,
+                AccountId = clientId.ClientId,
+                BrokerId = clientId.BrokerId,
                 FromAsset = fromAsset.Symbol,
                 ToAsset = toAsset.Symbol,
                 FromAssetVolume = request.FromAssetVolume ?? 0.0,
@@ -139,14 +137,15 @@ namespace Service.Wallet.Api.Controllers
                 throw new WalletApiBadRequestException("ToAsset cannot be empty");
             if (string.IsNullOrEmpty(request.OperationId))
                 throw new WalletApiBadRequestException("OperationId cannot be empty");
-            
-            var walletId = this.GetWalletIdentity();
+
+            var clientId = this.GetClientIdentity();
+            var walletId = await _walletService.GetDefaultWalletAsync(clientId);
 
             var quoteResponse = await _quoteService.ExecuteQuoteAsync(new ExecuteQuoteRequest()
             {
                 WalletId = walletId.WalletId,
-                AccountId = walletId.ClientId,
-                BrokerId = walletId.BrokerId,
+                AccountId = clientId.ClientId,
+                BrokerId = clientId.BrokerId,
                 FromAsset = request.FromAsset,
                 ToAsset = request.ToAsset,
                 FromAssetVolume = request.FromAssetVolume,

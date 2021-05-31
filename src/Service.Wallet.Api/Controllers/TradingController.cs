@@ -3,13 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyJetWallet.Domain;
 using MyJetWallet.Domain.Orders;
 using Service.ActiveOrders.Grpc;
 using Service.ActiveOrders.Grpc.Models;
-using Service.Authorization.Client.Http;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
 using Service.Wallet.Api.Domain.Orders;
+using Service.Wallet.Api.Domain.Wallets;
 
 namespace Service.Wallet.Api.Controllers
 {
@@ -20,14 +21,16 @@ namespace Service.Wallet.Api.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly IActiveOrderService _activeOrderService;
+        private readonly IWalletService _walletService;
 
         //todo: нужен метод установки лимит ордера на обмен конкретного количества валюты
         //todo: в заявке надо сделать необходимым помимо волума указывать валюту волума, чтоб мы могли фиксировать котируемый или базовый обьем
 
-        public TradingController(IOrderService orderService, IActiveOrderService activeOrderService)
+        public TradingController(IOrderService orderService, IActiveOrderService activeOrderService, IWalletService walletService)
         {
             _orderService = orderService;
             _activeOrderService = activeOrderService;
+            _walletService = walletService;
         }
 
         /// <summary>
@@ -43,7 +46,9 @@ namespace Service.Wallet.Api.Controllers
             if (string.IsNullOrEmpty(request.InstrumentSymbol))
                 throw new WalletApiBadRequestException("InstrumentSymbol cannot be empty");
 
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+            var walletId = new JetWalletIdentity(clientId.BrokerId, clientId.BrandId, clientId.ClientId, wallet.WalletId);
 
             var orderId = await _orderService.CreateLimitOrderAsync(walletId, request.InstrumentSymbol, request.Price,
                 request.Volume, request.Side);
@@ -70,7 +75,9 @@ namespace Service.Wallet.Api.Controllers
             if (string.IsNullOrEmpty(request.InstrumentSymbol))
                 throw new WalletApiBadRequestException("InstrumentSymbol cannot be empty");
 
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+            var walletId = new JetWalletIdentity(clientId.BrokerId, clientId.BrandId, clientId.ClientId, wallet.WalletId);
 
             //todo: exec create order for walletId
 
@@ -102,7 +109,9 @@ namespace Service.Wallet.Api.Controllers
             if (string.IsNullOrEmpty(request.VolumeAssetSymbol))
                 throw new WalletApiBadRequestException("VolumeAssetSymbol cannot be empty");
 
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+            var walletId = new JetWalletIdentity(clientId.BrokerId, clientId.BrandId, clientId.ClientId, wallet.WalletId);
 
             //todo: exec create order for walletId
 
@@ -127,7 +136,9 @@ namespace Service.Wallet.Api.Controllers
         {
             if (request == null) throw new WalletApiBadRequestException("request cannot be null");
 
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+            var walletId = new JetWalletIdentity(clientId.BrokerId, clientId.BrandId, clientId.ClientId, wallet.WalletId);
 
             //todo: cancel order
 
@@ -140,14 +151,14 @@ namespace Service.Wallet.Api.Controllers
         /// Get list of Placed limit orders
         /// </summary>
         [HttpGet("order-list/{wallet}")]
-        public async Task<Response<List<SpotOrder>>> GetActiveOrdersAsync([FromRoute] string wallet)
+        public async Task<Response<List<SpotOrder>>> GetActiveOrdersAsync()
         {
-            if (wallet == null) throw new WalletApiBadRequestException("request cannot be null");
-            var walletId = this.GetWalletIdentity();
-
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+            
             var orders = await _activeOrderService.GetActiveOrdersAsync(new GetActiveOrdersRequest()
             {
-                WalletId = walletId.WalletId
+                WalletId = wallet.WalletId
             });
 
             var response = orders.Orders.Select(e => new SpotOrder()

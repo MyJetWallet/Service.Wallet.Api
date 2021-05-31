@@ -3,14 +3,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
+using MyJetWallet.Sdk.Authorization;
+using MyJetWallet.Sdk.Authorization.Http;
+using MyJetWallet.Sdk.Authorization.NoSql;
+using MyNoSqlServer.Abstractions;
 using Newtonsoft.Json;
 using Service.ActiveOrders.Grpc;
-using Service.Authorization.Client.Http;
 using Service.Balances.Grpc;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Registration.Grpc;
-using Service.Registration.Grpc.Models;
-using Service.Wallet.Api.Controllers;
 using Service.Wallet.Api.Domain.Assets;
 using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Hubs.Dto;
@@ -31,6 +32,7 @@ namespace Service.Wallet.Api.Hubs
         private readonly IClientRegistrationService _clientRegistrationService;
         private readonly IWalletBalanceService _balanceService;
         private readonly IActiveOrderService _orderService;
+        private readonly IMyNoSqlServerDataReader<ShortRootSessionNoSqlEntity> _sessionReader;
 
 
         public const string AccessTokenParamName = "access_token";
@@ -42,7 +44,8 @@ namespace Service.Wallet.Api.Hubs
             ICurrentPricesCache currentPricesCache,
             IClientRegistrationService clientRegistrationService,
             IWalletBalanceService balanceService,
-            IActiveOrderService orderService)
+            IActiveOrderService orderService,
+            IMyNoSqlServerDataReader<ShortRootSessionNoSqlEntity> sessionReader)
         {
             _logger = logger;
             _hubManager = hubManager;
@@ -52,6 +55,7 @@ namespace Service.Wallet.Api.Hubs
             _clientRegistrationService = clientRegistrationService;
             _balanceService = balanceService;
             _orderService = orderService;
+            _sessionReader = sessionReader;
         }
 
         public override async Task OnConnectedAsync()
@@ -96,24 +100,41 @@ namespace Service.Wallet.Api.Hubs
 
             var (result, token) = MyControllerBaseHelper.ParseToken(tokenString);
 
-            if (result != TokenParseResult.Ok || !token.IsValid())
+            if (result != TokenParseResult.Ok || token == null)
             {
-                _logger.LogWarning("[HUB] Cannot parse token. Result: {resultText}; Token: {JsonText}",
-                    result.ToString(), token != null ? JsonConvert.SerializeObject(token) : "null");
-
+                _logger.LogWarning("[HUB] Cannot parse token. Result: {resultText}; Token: {JsonText}", result.ToString(), token != null ? JsonConvert.SerializeObject(token) : "null");
                 Context.Abort();
-
                 return;
             }
 
-            var clientId = new JetClientIdentity(token.BrokerId, token.BrandId, token.ClientId());
+            if (!token.RootSessionId.HasValue)
+            {
+                _logger.LogWarning("[HUB] Cannot parse token. RootSessionId does not exist. Token: {JsonText}", JsonConvert.SerializeObject(token));
+                Context.Abort();
+                return;
+            }
+
+            var session = _sessionReader.Get(ShortRootSessionNoSqlEntity.GeneratePartitionKey(token.TraderId()), ShortRootSessionNoSqlEntity.GenerateRowKey(token.RootSessionId ?? Guid.Empty));
+
+            var sessionCreatedTime = token.CreatedTime();
+            if (session == null && sessionCreatedTime.HasValue && DateTime.Now - sessionCreatedTime.Value > RootSessionAuthHandler.SessionTrustedTimeSpan)
+            {
+                _logger.LogWarning("[HUB] Cannot parse token. Session does not exist. Token: {JsonText}", JsonConvert.SerializeObject(token));
+                Context.Abort();
+                return;
+            }
+
+            var clientId = new JetClientIdentity(AuthorizationConst.DefaultBrokerId, token.BrandId, token.TraderId());
             
             var ctx = new HubClientConnection(Context, Clients.Caller, clientId, _assetService, _walletService, _currentPricesCache, _balanceService, _orderService, _logger);
-            ctx.SetWalletId(new JetWalletIdentity(token.BrokerId, token.BrandId, token.ClientId(), token.WalletId));
+
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+
+            ctx.SetWalletId(new JetWalletIdentity(AuthorizationConst.DefaultBrokerId, token.BrandId, token.TraderId(), wallet.WalletId));
 
             _hubManager.Connected(ctx);
 
-            var message = WelcomeMessage.Create($"Hello {token.ClientId()}/{token.WalletId}");
+            var message = WelcomeMessage.Create($"Hello {clientId.ClientId}/{wallet.WalletId}");
 
             await Clients.Caller.SendAsync(HubNames.Welcome, message);
 

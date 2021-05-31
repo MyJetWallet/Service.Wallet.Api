@@ -1,7 +1,9 @@
 ﻿using System;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using MyJetWallet.Domain;
+using MyJetWallet.Sdk.Authorization.Http;
 using Newtonsoft.Json;
-using Service.Authorization.Client.Http;
 using Service.Wallet.Api.Domain.Wallets;
 
 namespace Service.Wallet.Api.Controllers
@@ -71,6 +73,12 @@ namespace Service.Wallet.Api.Controllers
                 return "Unknown";
             }
         }
-        
+
+        public static JetClientIdentity GetClientIdentity(this ControllerBase controller)
+        {
+            var id = new JetClientIdentity(controller.GetBrokerId(), controller.GetBrandId(), controller.GetClientId());
+            return id;
+        }
+
     }
 }

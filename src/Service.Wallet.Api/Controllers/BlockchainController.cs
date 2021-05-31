@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Eventing.Reader;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -7,17 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain.Assets;
 using Service.AssetsDictionary.Client;
-using Service.Authorization.Client.Http;
 using Service.Balances.Grpc;
 using Service.Bitgo.DepositDetector.Domain.Models;
-using Service.Bitgo.DepositDetector.Grpc;
-using Service.Bitgo.WithdrawalProcessor.Grpc;
 using Service.Bitgo.WithdrawalProcessor.Grpc.Models;
 using Service.Service.KYC.Client;
 using Service.Service.KYC.Domain.Models;
 using Service.Service.KYC.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Contracts;
+using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Services;
 
 namespace Service.Wallet.Api.Controllers
@@ -33,13 +30,15 @@ namespace Service.Wallet.Api.Controllers
         private readonly IWalletBalanceService _balanceService;
         private readonly IKycStatusClient _kycStatusClient;
         private readonly IAssetPaymentSettingsClient _assetPaymentSettingsClient;
+        private readonly IWalletService _walletService;
 
         public BlockchainController(ILogger<BlockchainController> logger,
             IBlockchainIntegrationService blockchainIntegrationService,
             IAssetsDictionaryClient assetsDictionaryClient,
             IWalletBalanceService balanceService,
             IKycStatusClient kycStatusClient,
-            IAssetPaymentSettingsClient assetPaymentSettingsClient)
+            IAssetPaymentSettingsClient assetPaymentSettingsClient,
+            IWalletService walletService)
         {
             _logger = logger;
             _blockchainIntegrationService = blockchainIntegrationService;
@@ -47,6 +46,7 @@ namespace Service.Wallet.Api.Controllers
             _balanceService = balanceService;
             _kycStatusClient = kycStatusClient;
             _assetPaymentSettingsClient = assetPaymentSettingsClient;
+            _walletService = walletService;
         }
 
         /// <summary>
@@ -55,14 +55,15 @@ namespace Service.Wallet.Api.Controllers
         [HttpPost("generate-deposit-address")]
         public async Task<Response<GenerateDepositAddressResponse>> GenerateDepositAddressAsync(GenerateDepositAddressRequest request)
         {
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var walletId = await _walletService.GetDefaultWalletAsync(clientId);
 
             _logger.LogInformation("Receive Generate deposit address. User: {brokerId}|{clientId}. Request: {jsonText}",
-                walletId.BrokerId, walletId.ClientId, JsonSerializer.Serialize(request));
+                clientId.BrokerId, clientId.ClientId, JsonSerializer.Serialize(request));
 
             var assetIdentity = new AssetIdentity()
             {
-                BrokerId = walletId.BrokerId,
+                BrokerId = clientId.BrokerId,
                 Symbol = request.AssetSymbol
             };
 
@@ -82,8 +83,8 @@ namespace Service.Wallet.Api.Controllers
             {
                 var kycStatus = _kycStatusClient.GetClientKycStatus(new KycStatusRequest()
                 {
-                    BrokerId = walletId.BrokerId,
-                    ClientId = walletId.ClientId
+                    BrokerId = clientId.BrokerId,
+                    ClientId = clientId.ClientId
                 });
 
                 if (kycStatus.Status != KycStatus.Verified)
@@ -92,9 +93,9 @@ namespace Service.Wallet.Api.Controllers
 
             var result = await _blockchainIntegrationService.GetDepositAddressAsync(new GetDepositAddressRequest()
             {
-                BrokerId = walletId.BrokerId,
+                BrokerId = clientId.BrokerId,
                 WalletId = walletId.WalletId,
-                ClientId = walletId.ClientId,
+                ClientId = clientId.ClientId,
                 AssetSymbol = asset.Symbol
             });
 
@@ -115,16 +116,17 @@ namespace Service.Wallet.Api.Controllers
         [HttpPost("withdrawal")]
         public async Task<Response<WithdrawalResponse>> WithdrawalAsync(WithdrawalRequest request)
         {
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
+            var walletId = await _walletService.GetDefaultWalletAsync(clientId);
 
             var requestId = request.RequestId ?? Guid.NewGuid().ToString("N");
 
-            _logger.LogInformation("Receive Crypto Withdrawal User: {brokerId}|{clientId}. RequestId: {requestId}. Request: {jsonText}", 
-                walletId.BrokerId, walletId.ClientId, requestId, JsonSerializer.Serialize(request));
+            _logger.LogInformation("Receive Crypto Withdrawal User: {brokerId}|{clientId}. RequestId: {requestId}. Request: {jsonText}",
+                clientId.BrokerId, clientId.ClientId, requestId, JsonSerializer.Serialize(request));
 
             var assetIdentity = new AssetIdentity()
             {
-                BrokerId = walletId.BrokerId,
+                BrokerId = clientId.BrokerId,
                 Symbol = request.AssetSymbol
             };
 
@@ -159,8 +161,8 @@ namespace Service.Wallet.Api.Controllers
             {
                 var kycStatus = _kycStatusClient.GetClientKycStatus(new KycStatusRequest()
                 {
-                    BrokerId = walletId.BrokerId,
-                    ClientId = walletId.ClientId
+                    BrokerId = clientId.BrokerId,
+                    ClientId = clientId.ClientId
                 });
 
                 if (kycStatus.Status != KycStatus.Verified)
@@ -172,8 +174,8 @@ namespace Service.Wallet.Api.Controllers
 
             var result = await _blockchainIntegrationService.CryptoWithdrawalAsync(new CryptoWithdrawalRequest()
             {
-                BrokerId = walletId.BrokerId,
-                ClientId = walletId.ClientId,
+                BrokerId = clientId.BrokerId,
+                ClientId = clientId.ClientId,
                 WalletId = walletId.WalletId,
                 AssetSymbol = request.AssetSymbol,
                 Amount = request.Amount,
@@ -184,12 +186,12 @@ namespace Service.Wallet.Api.Controllers
             if (result.Error == null || result.Error.Code == BitgoErrorType.ErrorCode.Ok)
             { 
                 _logger.LogInformation("Crypto Withdrawal is done. User: {brokerId}|{clientId}. RequestId: {requestId}. Result: {jsonText}",
-                walletId.BrokerId, walletId.ClientId, requestId, JsonSerializer.Serialize(request));
+                    clientId.BrokerId, clientId.ClientId, requestId, JsonSerializer.Serialize(request));
             }
             else
             {
                 _logger.LogWarning("Crypto Withdrawal is FAIL. User: {brokerId}|{clientId}. RequestId: {requestId}. Result: {jsonText}",
-                    walletId.BrokerId, walletId.ClientId, requestId, JsonSerializer.Serialize(request));
+                    clientId.BrokerId, clientId.ClientId, requestId, JsonSerializer.Serialize(request));
             }
             
             switch (result.Error?.Code)
@@ -221,11 +223,11 @@ namespace Service.Wallet.Api.Controllers
         [HttpPost("validate-address")]
         public async Task<Response<ValidationAddressResponse>> ValidateAddressAsync(ValidationAddressRequest request)
         {
-            var walletId = this.GetWalletIdentity();
+            var clientId = this.GetClientIdentity();
 
             var assetIdentity = new AssetIdentity()
             {
-                BrokerId = walletId.BrokerId,
+                BrokerId = clientId.BrokerId,
                 Symbol = request.AssetSymbol
             };
 
@@ -245,15 +247,15 @@ namespace Service.Wallet.Api.Controllers
 
             var result = await _blockchainIntegrationService.ValidateAddressAsync(new ValidateAddressRequest()
             {
-                BrokerId = walletId.BrokerId,
+                BrokerId = clientId.BrokerId,
                 AssetSymbol = asset.Symbol,
                 Address = request.ToAddress
             });
 
             if (result.Error != null)
             {
-                _logger.LogInformation("Cannot validate address. User: {brokerId}|{clientId}. Request: {jsonText}. Response: {jsonText2}", 
-                    walletId.BrokerId, walletId.ClientId,
+                _logger.LogInformation("Cannot validate address. User: {brokerId}|{clientId}. Request: {jsonText}. Response: {jsonText2}",
+                    clientId.BrokerId, clientId.ClientId,
                     JsonSerializer.Serialize(request), JsonSerializer.Serialize(result));
 
                 return new Response<ValidationAddressResponse>(new ValidationAddressResponse()

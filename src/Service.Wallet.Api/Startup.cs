@@ -14,20 +14,20 @@ using Microsoft.Extensions.Hosting;
 using Autofac;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using MyJetWallet.Sdk.Authorization.Http;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.DataReader;
 using MyServiceBus.TcpClient;
 using MySettingsReader;
 using Newtonsoft.Json;
 using Prometheus;
-using Service.Authorization.Client;
-using Service.Wallet.Api.Authentication;
 using Service.Wallet.Api.Hubs;
 using Service.Wallet.Api.Middleware;
 using Service.Wallet.Api.Modules;
 using Service.Wallet.Api.Settings;
 using SimpleTrading.BaseMetrics;
 using SimpleTrading.ServiceStatusReporterConnector;
+using SimpleTrading.TokensManager;
 
 namespace Service.Wallet.Api
 {
@@ -75,13 +75,22 @@ namespace Service.Wallet.Api
                 //.AddMessagePackProtocol()
                 ;
 
-            services.AddAuthenticationJetWallet();
+            services
+                .AddAuthentication(o => { o.DefaultScheme = "Bearer"; })
+                .AddScheme<MyAuthenticationOptions, RootSessionAuthHandler11>("Bearer", o => { });
 
             services.AddMyTelemetry("SP-", Program.Settings.ZipkinUrl);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            if (env.IsDevelopment())
+            {
+                TokensManager.DebugMode = true;
+                RootSessionAuthHandler11.IsDevelopmentEnvironment = true;
+            }
+
+
             app.UseForwardedHeaders();
 
             //app.UseMiddleware<ExceptionLogMiddleware>();
@@ -110,6 +119,7 @@ namespace Service.Wallet.Api
             app.BindDebugMiddleware();
 
             app.UseMiddleware<ExceptionLogMiddleware>();
+            app.UseMiddleware<DebugMiddleware>();
 
             app.UseAuthentication();
             app.UseAuthorization();

@@ -20,10 +20,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="MyJetWallet.Domain" Version="1.0.30" />
     <PackageReference Include="MyJetWallet.Domain.ServiceBus" Version="1.2.0" />
+    <PackageReference Include="MyJetWallet.Sdk.Authorization" Version="1.0.15" />
     <PackageReference Include="MyJetWallet.Sdk.NoSql" Version="1.0.3" />
     <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.4.6" />
     <PackageReference Include="MyJetWallet.Service.ActiveOrders.Client" Version="1.0.3" />
-    <PackageReference Include="MyJetWallet.Service.Authorization.Client" Version="1.0.9" />
     <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="1.6.1" />
     <PackageReference Include="MyJetWallet.Service.Balances.Client" Version="1.0.7" />
     <PackageReference Include="MyJetWallet.Service.BaseCurrencyConverter.Client" Version="1.0.2" />
