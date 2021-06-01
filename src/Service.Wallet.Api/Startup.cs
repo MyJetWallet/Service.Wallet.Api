@@ -77,7 +77,7 @@ namespace Service.Wallet.Api
 
             services
                 .AddAuthentication(o => { o.DefaultScheme = "Bearer"; })
-                .AddScheme<MyAuthenticationOptions, RootSessionAuthHandler11>("Bearer", o => { });
+                .AddScheme<MyAuthenticationOptions, RootSessionAuthHandler>("Bearer", o => { });
 
             services.AddMyTelemetry("SP-", Program.Settings.ZipkinUrl);
         }
@@ -87,7 +87,7 @@ namespace Service.Wallet.Api
             if (env.IsDevelopment())
             {
                 TokensManager.DebugMode = true;
-                RootSessionAuthHandler11.IsDevelopmentEnvironment = true;
+                RootSessionAuthHandler.IsDevelopmentEnvironment = true;
             }
 
 
