@@ -83,12 +83,12 @@ namespace TestAuth
                 token = refreshResult.Token;
                 refreshToken = refreshResult.RefreshToken;
 
-                Console.WriteLine("ERROR!!! After login cannot refresh session");
+                Console.WriteLine("ERROR!!! After logout cannot refresh session");
                 return;
             }
             catch (Exception)
             {
-                Console.WriteLine("+++ After login cannot refresh session");
+                Console.WriteLine("+++ After logout cannot refresh session");
             }
 
 

@@ -16,9 +16,9 @@ namespace TestApp
             Console.ReadLine();
 
             var connection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:8080/signalr")
+                //.WithUrl("http://localhost:8080/signalr")
                 //.WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
-                //.WithUrl("https://wallet-api-spot.mnftx.biz/signalr")
+                .WithUrl("https://wallet-api-spot.mnftx.biz/signalr")
                 //.WithUrl("http://20.50.189.25:8080/signalr")
                 //.AddMessagePackProtocol()
                 .Build();
@@ -70,16 +70,16 @@ namespace TestApp
                 Console.WriteLine($"--> [{HubNames.Trades}] {JsonConvert.SerializeObject(message)}\r\n");
             });
 
-            //connection.On<BidAskMessage>(HubNames.BidAsk, message =>
-            //{
-            //    Console.WriteLine($"--> {JsonConvert.SerializeObject(message)}");
+            connection.On<BidAskMessage>(HubNames.BidAsk, message =>
+            {
+                Console.WriteLine($"--> {JsonConvert.SerializeObject(message)}");
 
-            //    foreach (var price in message.Prices)
-            //    {
-                    
-            //        Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime}\r\n");
-            //    }
-            //});
+                foreach (var price in message.Prices)
+                {
+
+                    Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime}\r\n");
+                }
+            });
 
             connection.On<ActiveOrdersMessage>(HubNames.ActiveOrders, message =>
             {
@@ -102,7 +102,7 @@ namespace TestApp
 
             await connection.StartAsync();
 
-            await connection.SendAsync(HubNames.Init, "bneE572Me31P5mxFVNraWdnmtvecdUwa3e6DWKu5GdNxgCOR1CqrQUBRlC84CsYrv+mYj5wQGLS9q2PFqWDstJJjVbzpoj8QIPbrNJIrXphqErRLQU0IlCMYtNyma+sqs23F8ufK07cpW4+pxnCOOMPvz5KQfb7042BbQgKX4oehLGruKxi8ksaiwPzW8PLB");
+            await connection.SendAsync(HubNames.Init, "GCMTUp97+7F6Dizf5GxlF9sa+tqKOtroAnJfcZCBETZTEu7pmf3Xo++bbyf7rJALv9vaP57to9S/LAFaNauVCq72SyjcXQ+eQPpGlKGH31k7GqudrJRZTI8bVOTm/422Wds+4CAtBURsPXe6pS2B2A==");
 
             var run = true;
 
