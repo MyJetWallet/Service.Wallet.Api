@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="MyJetWallet.Domain" Version="1.0.30" />
     <PackageReference Include="MyJetWallet.Service.AssetsDictionary.Client" Version="1.5.4" />
-    <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.0.13" />
+    <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.0.14" />
   </ItemGroup>
 
 </Project>
