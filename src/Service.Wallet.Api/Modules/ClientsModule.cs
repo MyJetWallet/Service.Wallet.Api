@@ -14,6 +14,7 @@ using Service.ClientWallets.Client;
 using Service.Liquidity.Converter.Client;
 using Service.MatchingEngine.Api.Client;
 using Service.MatchingEngine.PriceSource.Client;
+using Service.PushNotification.Client;
 using Service.Registration.Client;
 using Service.Service.KYC.Client;
 using Service.TradeHistory.Client;
@@ -55,6 +56,8 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterLiquidityConverterClient(Program.Settings.LiquidityConverterGrpcServiceUrl);
 
             builder.RegisterBaseCurrencyConverterClient(Program.Settings.BaseCurrencyConverterGrpcServiceUrl, myNoSqlClient);
+            
+            builder.RegisterPushNotificationClient(Program.Settings.PushNotificationGrpcServiceUrl);
 
             RegisterAuthServices(builder);
         }

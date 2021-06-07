@@ -49,6 +49,9 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.LiquidityConverterGrpcServiceUrl")]
         public string LiquidityConverterGrpcServiceUrl { get; set; }
+        
+        [YamlProperty("WalletApi.PushNotificationGrpcServiceUrl")]
+        public string PushNotificationGrpcServiceUrl { get; set; }
 
         [YamlProperty("WalletApi.ZipkinUrl")] public string ZipkinUrl { get; set; }
 
