@@ -42,7 +42,7 @@ namespace Service.Wallet.Api.Modules
 
             builder.RegisterActiveOrdersClients(Program.Settings.ActiveOrdersGrpcServiceUrl, myNoSqlClient);
 
-            builder.RegisterTradeHistoryClient(Program.Settings.TradeHistoryGrpcServiceUrl);
+            builder.RegisterTradeHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
 
             builder.RegisterBitgoDepositAddressClient(Program.Settings.BitgoDepositDetectorGrpcServiceUrl, myNoSqlClient);
 

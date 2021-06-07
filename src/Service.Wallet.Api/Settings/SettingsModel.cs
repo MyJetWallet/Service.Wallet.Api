@@ -31,10 +31,7 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.ActiveOrdersGrpcServiceUrl")]
         public string ActiveOrdersGrpcServiceUrl { get; set; }
-
-        [YamlProperty("WalletApi.TradeHistoryGrpcServiceUrl")]
-        public string TradeHistoryGrpcServiceUrl { get; set; }
-
+        
         [YamlProperty("WalletApi.BitgoDepositDetectorGrpcServiceUrl")]
         public string BitgoDepositDetectorGrpcServiceUrl { get; set; }
 
