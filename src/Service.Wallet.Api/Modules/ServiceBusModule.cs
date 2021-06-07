@@ -6,7 +6,7 @@ using MyJetWallet.Domain.ServiceBus.PublisherSubscriber.BidAsks;
 using MyJetWallet.Sdk.Service;
 using MyServiceBus.Abstractions;
 using MyServiceBus.TcpClient;
-using Service.TradeHistory.Client;
+using Service.BalanceHistory.Client;
 
 namespace Service.Wallet.Api.Modules
 {

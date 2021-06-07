@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Service.TradeHistory.Domain.Models;
+using Service.BalanceHistory.Domain.Models;
 
 namespace Service.Wallet.Api.Hubs.Dto
 {

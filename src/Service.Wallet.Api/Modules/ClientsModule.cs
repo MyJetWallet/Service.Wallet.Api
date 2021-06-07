@@ -17,7 +17,6 @@ using Service.MatchingEngine.PriceSource.Client;
 using Service.PushNotification.Client;
 using Service.Registration.Client;
 using Service.Service.KYC.Client;
-using Service.TradeHistory.Client;
 
 namespace Service.Wallet.Api.Modules
 {
