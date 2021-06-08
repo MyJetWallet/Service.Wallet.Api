@@ -26,18 +26,20 @@ namespace Service.Wallet.Api.Controllers
         private readonly IWalletBalanceUpdateService _balanceUpdateService;
 
         private readonly IAssetsDictionaryClient _assetsDictionaryClient;
+        private readonly ISwapHistoryService _swapHistoryService;
 
         private readonly IWalletService _walletService;
         //todo: get order by id
         //todo: get trade by id
 
         public WalletHistoryController(IWalletTradeService walletTradeService, IWalletBalanceUpdateService balanceUpdateService, IAssetsDictionaryClient assetsDictionaryClient,
-            IWalletService walletService)
+            IWalletService walletService, ISwapHistoryService swapHistoryService)
         {
             _walletTradeService = walletTradeService;
             _balanceUpdateService = balanceUpdateService;
             _assetsDictionaryClient = assetsDictionaryClient;
             _walletService = walletService;
+            _swapHistoryService = swapHistoryService;
         }
 
         [HttpGet("balance-history")]
@@ -117,6 +119,23 @@ namespace Service.Wallet.Api.Controllers
             });
             
             return new Response<List<WalletTrade>>(data.Trades);
+        }
+        [HttpGet("swap-history")]
+        public async Task<Response<List<Swap>>> GetSwapHistory([FromQuery] int batchSize, [FromQuery] DateTime? lastDate, [FromQuery] [CanBeNull] string walletId)
+        {
+            var request = new GetSwapsRequest() { BatchSize = batchSize};
+            if (lastDate != null)
+            {
+                request.LastDate = (DateTime)lastDate;
+            }
+
+            if (!string.IsNullOrWhiteSpace(walletId))
+            {
+                request.WalletId = walletId;
+            }
+
+            var data = await _swapHistoryService.GetSwapsAsync(request);
+            return new Response<List<Swap>>(data.SwapCollection);
         }
     }
 }

@@ -42,8 +42,6 @@ namespace Service.Wallet.Api.Modules
 
             builder.RegisterActiveOrdersClients(Program.Settings.ActiveOrdersGrpcServiceUrl, myNoSqlClient);
 
-            builder.RegisterTradeHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
-
             builder.RegisterBitgoDepositAddressClient(Program.Settings.BitgoDepositDetectorGrpcServiceUrl, myNoSqlClient);
 
             builder.RegisterBitgoCryptoWithdrawalClient(Program.Settings.BitgoCryptoWithdrawalGrpcServiceUrl);
@@ -51,6 +49,8 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterKycStatusClients(myNoSqlClient, Program.Settings.KycGrpcServiceUrl);
 
             builder.RegisterBalanceHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
+            builder.RegisterTradeHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
+            builder.RegisterSwapHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
             
             builder.RegisterLiquidityConverterClient(Program.Settings.LiquidityConverterGrpcServiceUrl);
 
