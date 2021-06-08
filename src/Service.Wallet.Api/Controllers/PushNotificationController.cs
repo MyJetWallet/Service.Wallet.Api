@@ -40,7 +40,8 @@ namespace Service.Wallet.Api.Controllers
                 ClientId = identity.ClientId,
                 RootSessionId = rootSessionId,
                 Token = request.Token,
-                UserLocale = request.UserLocale
+                UserLocale = request.UserLocale,
+                BrandId = identity.BrandId
             });
             _logger.LogInformation("Received token {Token} and locale {UserLocale}", request.Token, request.UserLocale);
             return Contracts.Response.OK();

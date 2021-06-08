@@ -33,7 +33,7 @@
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.Api.Client" Version="1.0.2" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.PriceSource.Client" Version="1.2.1" />
     <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.0.22" />
-    <PackageReference Include="MyJetWallet.Service.PushNotification.Client" Version="1.1.0" />
+    <PackageReference Include="MyJetWallet.Service.PushNotification.Client" Version="1.2.0" />
     <PackageReference Include="MyJetWallet.Service.Registration.Client" Version="1.0.0" />
     <PackageReference Include="MyJetWallet.Service.Service.KYC.Client" Version="1.0.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
