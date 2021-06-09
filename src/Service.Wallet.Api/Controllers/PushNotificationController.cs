@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Authorization.Http;
@@ -30,10 +31,11 @@ namespace Service.Wallet.Api.Controllers
         /// </summary>
         [HttpPost("token")]
         [Authorize]
-        public async Task<Response> RegisterToken([FromBody] RegisterTokenRequest request)
+        public async Task<Response> RegisterToken([FromBody] RegisterTokenRequest request, [FromServices] IHttpContextAccessor accessor)
         {
             var identity = this.GetClientIdentity();
             var (rootSessionId, _) = this.GetSessionId();
+            var userAgent = accessor.HttpContext.GetUserAgent();
             
             await _tokenManager.RegisterToken(new PushToken()
             {
@@ -41,7 +43,8 @@ namespace Service.Wallet.Api.Controllers
                 RootSessionId = rootSessionId,
                 Token = request.Token,
                 UserLocale = request.UserLocale,
-                BrandId = identity.BrandId
+                BrandId = identity.BrandId,
+                UserAgent = userAgent
             });
             _logger.LogInformation("Received token {Token} and locale {UserLocale}", request.Token, request.UserLocale);
             return Contracts.Response.OK();
