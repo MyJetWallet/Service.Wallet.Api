@@ -121,19 +121,16 @@ namespace Service.Wallet.Api.Controllers
             return new Response<List<WalletTrade>>(data.Trades);
         }
         [HttpGet("swap-history")]
-        public async Task<Response<List<Swap>>> GetSwapHistory([FromQuery] int batchSize, [FromQuery] DateTime? lastDate, [FromQuery] [CanBeNull] string walletId)
+        public async Task<Response<List<Swap>>> GetSwapHistory([FromQuery] int batchSize, [FromQuery] DateTime? lastDate)
         {
-            var request = new GetSwapsRequest() { BatchSize = batchSize};
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+            
+            var request = new GetSwapsRequest() { BatchSize = batchSize, WalletId = wallet.WalletId};
             if (lastDate != null)
             {
                 request.LastDate = (DateTime)lastDate;
             }
-
-            if (!string.IsNullOrWhiteSpace(walletId))
-            {
-                request.WalletId = walletId;
-            }
-
             var data = await _swapHistoryService.GetSwapsAsync(request);
             return new Response<List<Swap>>(data.SwapCollection);
         }
