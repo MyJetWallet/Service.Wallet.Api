@@ -6,7 +6,7 @@ namespace Service.Wallet.Api.Controllers.Contracts
     public class GetSwapQuoteResponse
     {
         public string OperationId { get; set; }
-        public double Price { get; set; }
+        public decimal Price { get; set; }
         
         public string FromAsset { get; set; }
         public string ToAsset { get; set; }
