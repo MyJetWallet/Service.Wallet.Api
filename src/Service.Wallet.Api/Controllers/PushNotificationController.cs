@@ -8,6 +8,7 @@ using Serilog;
 using Service.PushNotification.Domain.Models;
 using Service.PushNotification.Grpc;
 using Service.Wallet.Api.Controllers.Contracts;
+using SimpleTrading.ClientApi.Utils;
 
 namespace Service.Wallet.Api.Controllers
 {
