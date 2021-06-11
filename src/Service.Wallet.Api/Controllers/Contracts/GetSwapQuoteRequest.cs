@@ -9,9 +9,9 @@ namespace Service.Wallet.Api.Controllers.Contracts
 
         public string ToAsset { get; set; }
 
-        public double? FromAssetVolume { get; set; }
+        public decimal? FromAssetVolume { get; set; }
         
-        public double? ToAssetVolume { get; set; }
+        public decimal? ToAssetVolume { get; set; }
 
         /// <summary>
         /// true = from filled
