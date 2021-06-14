@@ -25,7 +25,7 @@ jobs:
         utcOffset: "+00:00"
         
     - name: Build
-      run: dotnet build --configuration Release /p:AssemblyVersion=0.0.${{ github.run_number }}.${{ github.sha }}
+      run: dotnet build --configuration Release /p:AssemblyVersion=0.0.${{ github.run_number }}
     - name: Test
       run: dotnet test --no-build --configuration Release
     - name: ls
