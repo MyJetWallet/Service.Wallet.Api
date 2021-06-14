@@ -21,6 +21,7 @@ using MyServiceBus.TcpClient;
 using MySettingsReader;
 using Newtonsoft.Json;
 using Prometheus;
+using Service.Wallet.Api.Domain.Common;
 using Service.Wallet.Api.Hubs;
 using Service.Wallet.Api.Middleware;
 using Service.Wallet.Api.Modules;
@@ -78,6 +79,12 @@ namespace Service.Wallet.Api
             services
                 .AddAuthentication(o => { o.DefaultScheme = "Bearer"; })
                 .AddScheme<MyAuthenticationOptions, RootSessionAuthHandler>("Bearer", o => { });
+
+            services
+                .AddAuthorization(o =>
+                {
+                    o.AddPolicy(AuthorizationPolicies.VerifiedEmailPolicy, policy => policy.RequireClaim("Email-Verified", "True"));
+                });
 
             services.AddMyTelemetry("SP-", Program.Settings.ZipkinUrl);
         }

@@ -12,6 +12,7 @@ using MyJetWallet.Sdk.Authorization.Http;
 using MyTcpSockets.Extensions;
 using Newtonsoft.Json;
 using Service.Wallet.Api.Controllers.Contracts;
+using Service.Wallet.Api.Domain.Common;
 using SimpleTrading.TokensManager;
 using SimpleTrading.TokensManager.Tokens;
 
@@ -52,7 +53,7 @@ namespace Service.Wallet.Api.Controllers
         }
 
         [HttpGet("who")]
-        [Authorize()]
+        [Authorize]
         public IActionResult Who()
         {
             var clientId = this.GetClientId();
@@ -89,6 +90,16 @@ namespace Service.Wallet.Api.Controllers
         public IActionResult ValidateSignatureAsync([FromBody] TokenDto data, [FromHeader(Name = AuthorizationConst.SignatureHeader)] string signature)
         {
             return Ok();
+        }
+
+        [HttpGet("verified-email-only")]        
+        [Authorize(Policy = AuthorizationPolicies.VerifiedEmailPolicy)]
+        public IActionResult WhoWithVerifiedEmail()
+        {
+            var clientId = this.GetClientId();
+            var brokerId = this.GetBrokerId();
+            var brandId = this.GetBrandId();
+            return Ok(new JetClientIdentity(brokerId, brandId, clientId));
         }
     }
 }
