@@ -8,6 +8,7 @@ using Service.MatchingEngine.PriceSource.Client;
 using Service.Wallet.Api.Controllers;
 using Service.Wallet.Api.Domain.Assets;
 using Service.Wallet.Api.Domain.Wallets;
+using SimpleTrading.ClientApi.Utils;
 
 namespace Service.Wallet.Api.Hubs
 {

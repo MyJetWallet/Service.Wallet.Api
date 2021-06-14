@@ -91,8 +91,8 @@ namespace Service.Wallet.Api.Controllers
                 BrokerId = clientId.BrokerId,
                 FromAsset = fromAsset.Symbol,
                 ToAsset = toAsset.Symbol,
-                FromAssetVolume = request.FromAssetVolume ?? 0.0,
-                ToAssetVolume = request.ToAssetVolume ?? 0.0,
+                FromAssetVolume = request.FromAssetVolume ?? 0.0m,
+                ToAssetVolume = request.ToAssetVolume ?? 0.0m,
                 IsFromFixed = request.IsFromFixed
             });
 

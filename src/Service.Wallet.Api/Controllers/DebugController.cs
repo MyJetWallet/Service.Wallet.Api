@@ -13,6 +13,7 @@ using MyTcpSockets.Extensions;
 using Newtonsoft.Json;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Domain.Common;
+using SimpleTrading.ClientApi.Utils;
 using SimpleTrading.TokensManager;
 using SimpleTrading.TokensManager.Tokens;
 
@@ -53,7 +54,7 @@ namespace Service.Wallet.Api.Controllers
         }
 
         [HttpGet("who")]
-        [Authorize]
+        [Authorize()]
         public IActionResult Who()
         {
             var clientId = this.GetClientId();
@@ -90,6 +91,17 @@ namespace Service.Wallet.Api.Controllers
         public IActionResult ValidateSignatureAsync([FromBody] TokenDto data, [FromHeader(Name = AuthorizationConst.SignatureHeader)] string signature)
         {
             return Ok();
+        }
+
+        [HttpGet("my-ip")]
+        public IActionResult GetMyApiAsync()
+        {
+            var ip = this.HttpContext.GetIp();
+            
+            var xff = HttpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var xffheader) ? xffheader.ToString() : "none";
+            var cf = HttpContext.Request.Headers.TryGetValue("CF-Connecting-IP", out var cfheader) ? cfheader.ToString() : "none";
+            
+            return Ok(new {IP = ip, XFF = xff, CF = cf});
         }
 
         [HttpGet("verified-email-only")]        
