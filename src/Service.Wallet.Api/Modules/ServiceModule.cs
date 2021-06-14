@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using MyJetWallet.Sdk.RestApiTrace;
 using Service.Wallet.Api.Domain.Assets;
 using Service.Wallet.Api.Domain.Orders;
 using Service.Wallet.Api.Domain.Wallets;
@@ -65,6 +66,13 @@ namespace Service.Wallet.Api.Modules
             builder
                 .RegisterType<BlockchainIntegrationService>()
                 .As<IBlockchainIntegrationService>()
+                .AutoActivate()
+                .SingleInstance();
+
+            builder
+                .RegisterInstance(new ApiTraceManager(Program.Settings.ElkLogs, "api-trace", Program.LoggerFactory.CreateLogger("ApiTraceManager")))
+                .As<IApiTraceManager>()
+                .As<IStartable>()
                 .AutoActivate()
                 .SingleInstance();
         }

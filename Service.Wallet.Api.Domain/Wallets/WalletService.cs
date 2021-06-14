@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -38,6 +39,9 @@ namespace Service.Wallet.Api.Domain.Wallets
                 _logger.LogError("Cannot found default wallet for Broker/Brand/Client: {brokerId}/{brandId}/{clientId}", clientId.BrokerId, clientId.BrandId, clientId.ClientId);
                 throw new Exception($"Cannot found default wallet for Broker/Brand/Client: {clientId.BrokerId}/{clientId.BrandId}/{clientId.ClientId}");
             }
+
+            Activity.Current?.AddTag("walletId", defaultWallet.WalletId);
+            Activity.Current?.AddBaggage("walletId", defaultWallet.WalletId);
 
             return defaultWallet;
         }

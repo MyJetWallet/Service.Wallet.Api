@@ -56,5 +56,8 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.BaseCurrencyConverterGrpcServiceUrl")]
         public string BaseCurrencyConverterGrpcServiceUrl { get; set; }
+
+        [YamlProperty("WalletApi.EnableApiTrace")]
+        public bool EnableApiTrace { get; set; }
     }
 }

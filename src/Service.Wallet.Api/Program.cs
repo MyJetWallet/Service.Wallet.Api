@@ -18,6 +18,8 @@ namespace Service.Wallet.Api
 
         public static SettingsModel Settings { get; private set; }
 
+        public static ILoggerFactory LoggerFactory { get; private set; }
+
         public static Func<T> ReloadedSettings<T>(Func<SettingsModel, T> getter)
         {
             return () =>
@@ -36,6 +38,8 @@ namespace Service.Wallet.Api
             Settings = SettingsReader.GetSettings<SettingsModel>(SettingsFileName);
 
             using var loggerFactory = LogConfigurator.ConfigureElk("MyJetWallet", Settings.SeqServiceUrl, Settings.ElkLogs);
+
+            LoggerFactory = loggerFactory;
 
             var logger = loggerFactory.CreateLogger<Program>();
 

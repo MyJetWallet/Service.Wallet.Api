@@ -15,6 +15,7 @@ using Autofac;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using MyJetWallet.Sdk.Authorization.Http;
+using MyJetWallet.Sdk.RestApiTrace;
 using MyJetWallet.Sdk.Service;
 using MyNoSqlServer.DataReader;
 using MyServiceBus.TcpClient;
@@ -100,8 +101,10 @@ namespace Service.Wallet.Api
 
             app.UseForwardedHeaders();
 
-            //app.UseMiddleware<ExceptionLogMiddleware>();
+            if (Program.Settings.EnableApiTrace)
+                app.UseMiddleware<ApiTraceMiddleware>();
 
+            
             app.BindMetricsMiddleware();
             
             if (env.IsDevelopment())
@@ -132,6 +135,8 @@ namespace Service.Wallet.Api
             app.UseAuthorization();
 
             app.UseWebSockets();
+
+            
 
             app.Use(async (context, next) =>
             {
