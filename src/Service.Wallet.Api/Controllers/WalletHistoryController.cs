@@ -125,6 +125,9 @@ namespace Service.Wallet.Api.Controllers
         {
             var clientId = this.GetClientIdentity();
             var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+
+            if (batchSize == 0)
+                batchSize = 20;
             
             var request = new GetSwapsRequest() { BatchSize = batchSize, WalletId = wallet.WalletId};
             if (lastDate != null)
