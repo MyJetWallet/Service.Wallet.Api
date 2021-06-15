@@ -101,6 +101,9 @@ namespace Service.Wallet.Api.Controllers
             if (eventType == "CASH_IN_OUT_OPERATION" && !isPositive)
                 return BalanceHistoryType.Withdrawal;
 
+            if (eventType == "CASH_SWAP_OPERATION")
+                return BalanceHistoryType.Convert;
+
             return BalanceHistoryType.Trade;
         }
 

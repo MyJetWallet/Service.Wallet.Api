@@ -8,6 +8,7 @@ namespace Service.Wallet.Api.Domain.Models
         Deposit,
         Withdrawal,
         Trade,
-        Transfer
+        Transfer,
+        Convert
     }
 }
