@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyJetWallet.Sdk.Service;
 using Service.AssetsDictionary.Client;
 using Service.Liquidity.Converter.Domain.Models;
 using Service.Liquidity.Converter.Grpc;
@@ -43,6 +44,8 @@ namespace Service.Wallet.Api.Controllers
         [HttpPost("get-quote")]
         public async Task<Response<GetSwapQuoteResponse>> GetSwapQuoteAsync([FromBody] GetSwapQuoteRequest request)
         {
+            request.AddToActivityAsTag("request-data");
+
             if (request == null) throw new WalletApiBadRequestException("request cannot be null");
             
             if ((!request.FromAssetVolume.HasValue && !request.ToAssetVolume.HasValue) ||
@@ -51,8 +54,8 @@ namespace Service.Wallet.Api.Controllers
                 throw new WalletApiBadRequestException("should be setup one of FromAssetVolume or ToAssetVolume");
             }
             
-            if (request.FromAssetVolume.HasValue && request.FromAssetVolume.Value <= 0) throw new WalletApiBadRequestException("volume (from) cannot be zero or negative");
-            if (request.ToAssetVolume.HasValue && request.ToAssetVolume.Value <= 0) throw new WalletApiBadRequestException("volume (to) cannot be zero or negative");
+            if (request.IsFromFixed && (request.FromAssetVolume ?? 0) <= 0) throw new WalletApiBadRequestException("volume (from) cannot be zero or negative");
+            if (!request.IsFromFixed && (request.ToAssetVolume ?? 0) <= 0) throw new WalletApiBadRequestException("volume (to) cannot be zero or negative");
             
             if (string.IsNullOrEmpty(request.FromAsset))
                 throw new WalletApiBadRequestException("FromAsset cannot be empty");
@@ -96,8 +99,19 @@ namespace Service.Wallet.Api.Controllers
                 IsFromFixed = request.IsFromFixed
             });
 
+            quoteResponse.AddToActivityAsJsonTag("quote-response");
+
             if (!quoteResponse.IsSuccess || quoteResponse.Data == null)
             {
+                switch (quoteResponse.ErrorCode)
+                {
+                    case QuoteResponseErrorCodes.NotEnoughLiquidity:
+                        throw new WalletApiErrorException("Can not get quote for convert. Not enough liquidity", ApiResponseCodes.NoqEnoughLiquidityForConvert);
+
+                    case QuoteResponseErrorCodes.NotEnoughBalance:
+                        throw new WalletApiErrorException("Can not get quote for convert. Not enough balance", ApiResponseCodes.LowBalance);
+                }
+
                 throw new WalletApiErrorException("Can not get quote for convert", ApiResponseCodes.CannotExecuteQuoteRequest);
             }
 
@@ -118,6 +132,8 @@ namespace Service.Wallet.Api.Controllers
                 IsFromFixed = quoteResponse.Data.IsFromFixed
             };
 
+            response.AddToActivityAsTag("response-data");
+
             return new Response<GetSwapQuoteResponse>(response);
         }
 
@@ -128,6 +144,8 @@ namespace Service.Wallet.Api.Controllers
         public async Task<Response<ExecuteSwapQuoteResponse>> ExecuteSwapQuoteAsync(
             [FromBody] ExecuteSwapQuoteRequest request)
         {
+            request.AddToActivityAsJsonTag("request-data");
+
             if (request == null) throw new WalletApiBadRequestException("request cannot be null");
             if (request.FromAssetVolume <= 0) throw new WalletApiBadRequestException("volume cannot be zero or negative");
             if (request.ToAssetVolume <= 0) throw new WalletApiBadRequestException("volume cannot be zero or negative");
@@ -155,7 +173,8 @@ namespace Service.Wallet.Api.Controllers
                 OperationId = request.OperationId,
                 Price = request.Price
             });
-            
+
+            quoteResponse.AddToActivityAsJsonTag("execute-response");
 
             if (quoteResponse.QuoteExecutionResult == QuoteExecutionResult.Error)
             {
@@ -180,6 +199,8 @@ namespace Service.Wallet.Api.Controllers
 
                 IsFromFixed = quoteResponse.Data.IsFromFixed
             };
+
+            response.AddToActivityAsJsonTag("response-data");
 
             return new Response<ExecuteSwapQuoteResponse>(response);
 
