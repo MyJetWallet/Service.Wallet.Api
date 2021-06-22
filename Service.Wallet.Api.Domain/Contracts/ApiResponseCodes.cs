@@ -21,6 +21,7 @@ namespace Service.Wallet.Api.Domain.Contracts
         InvalidOrderValue = 13,
         CannotProcessQuoteRequest = 14,
         CannotExecuteQuoteRequest = 15,
-        NoqEnoughLiquidityForConvert = 16
+        NoqEnoughLiquidityForConvert = 16,
+        LeadToNegativeSpread = 17
     }
 }

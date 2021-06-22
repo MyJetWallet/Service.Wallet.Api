@@ -10,5 +10,9 @@ namespace Service.Wallet.Api.Domain.Contracts
         {
             Code = code;
         }
+        public WalletApiErrorException(ApiResponseCodes code)
+        {
+            Code = code;
+        }
     }
 }

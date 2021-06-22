@@ -35,6 +35,7 @@ namespace Service.Wallet.Api.Middleware
             }
             catch (WalletApiHttpException ex)
             {
+                ex.StatusCode.AddToActivityAsTag("ErrorCode");
                 ex.FailActivity();
                 _logger.LogInformation(ex,"Receive WalletApiHttpException with status code: {StatusCode}; path: {Path}", ex.StatusCode, context.Request.Path);
 
@@ -43,6 +44,7 @@ namespace Service.Wallet.Api.Middleware
             }
             catch (WalletApiErrorException ex)
             {
+                ex.Code.AddToActivityAsTag("ErrorCode");
                 ex.FailActivity();
                 _logger.LogInformation(ex, "Receive WalletApiErrorException with status code: {codeText}; path: {Path}", ex.Code.ToString(), context.Request.Path);
 
@@ -56,7 +58,6 @@ namespace Service.Wallet.Api.Middleware
                 throw;
             }
         }
-
     }
 
     public class DebugMiddleware

@@ -192,6 +192,10 @@ namespace Service.Wallet.Api.Domain.Orders
 
             else if (respStatus == Status.InvalidOrderValue)
                 RejectOrder(ApiResponseCodes.InvalidOrderValue, respStatus, respStatusReason);
+            
+            // валидируется до запроса в ME. оставлено на случай ЧП =)
+            else if (respStatus == Status.LeadToNegativeSpread)
+                RejectOrder(ApiResponseCodes.LeadToNegativeSpread, respStatus, respStatusReason);
 
             else if (respStatus != Status.Ok)
                 RejectOrder(ApiResponseCodes.InternalServerError, respStatus, respStatusReason);

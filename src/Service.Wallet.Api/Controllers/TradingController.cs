@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -48,11 +49,13 @@ namespace Service.Wallet.Api.Controllers
 
             var clientId = this.GetClientIdentity();
             var wallet = await _walletService.GetDefaultWalletAsync(clientId);
-            var walletId = new JetWalletIdentity(clientId.BrokerId, clientId.BrandId, clientId.ClientId, wallet.WalletId);
-
-            var orderId = await _orderService.CreateLimitOrderAsync(walletId, request.InstrumentSymbol, request.Price,
+            var walletIdentity = new JetWalletIdentity(clientId.BrokerId, clientId.BrandId, clientId.ClientId, wallet.WalletId);
+            
+            await ValidateSpread(walletIdentity.WalletId, request.InstrumentSymbol, request.Side, request.Price);
+            
+            var orderId = await _orderService.CreateLimitOrderAsync(walletIdentity, request.InstrumentSymbol, request.Price,
                 request.Volume, request.Side);
-
+            
             var response = new CreatedOrderResponse()
             {
                 Type = OrderType.Limit,
@@ -61,6 +64,24 @@ namespace Service.Wallet.Api.Controllers
             };
 
             return new Response<CreatedOrderResponse>(response);
+        }
+
+        private async Task ValidateSpread(string walletId, string requestInstrumentSymbol, OrderSide requestSide, double requestPrice)
+        {
+            var orders = await _activeOrderService.GetActiveOrdersAsync(new GetActiveOrdersRequest()
+            {
+                WalletId = walletId
+            });
+            
+            if (orders.Orders.Any(elem =>
+                elem.InstrumentSymbol == requestInstrumentSymbol &&
+                elem.Side != requestSide &&
+                (requestSide == OrderSide.Sell
+                    ? elem.Price >= requestPrice
+                    : elem.Price <= requestPrice)))
+            {
+                throw new WalletApiErrorException(ApiResponseCodes.LeadToNegativeSpread);
+            }
         }
 
         /// <summary>
