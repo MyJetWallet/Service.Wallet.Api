@@ -23,7 +23,7 @@
     <PackageReference Include="MyJetWallet.Sdk.Authorization" Version="1.0.27" />
     <PackageReference Include="MyJetWallet.Sdk.NoSql" Version="1.0.4" />
     <PackageReference Include="MyJetWallet.Sdk.RestApiTrace" Version="1.0.7" />
-    <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.5.4" />
+    <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.5.5" />
     <PackageReference Include="MyJetWallet.Service.ActiveOrders.Client" Version="1.0.3" />
     <PackageReference Include="MyJetWallet.Service.BalanceHistory.Client" Version="1.6.7" />
     <PackageReference Include="MyJetWallet.Service.Balances.Client" Version="1.0.7" />
@@ -33,7 +33,7 @@
     <PackageReference Include="MyJetWallet.Service.Bitgo.WithdrawalProcessor.Client" Version="1.0.1" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.Api.Client" Version="1.0.2" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.PriceSource.Client" Version="1.2.1" />
-    <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.1.0" />
+    <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.1.1" />
     <PackageReference Include="MyJetWallet.Service.PushNotification.Client" Version="1.2.4.1" />
     <PackageReference Include="MyJetWallet.Service.Registration.Client" Version="1.0.0" />
     <PackageReference Include="MyJetWallet.Service.Service.KYC.Client" Version="1.0.6" />
