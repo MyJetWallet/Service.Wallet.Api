@@ -69,12 +69,17 @@ namespace Service.Wallet.Api.Modules
                 .AutoActivate()
                 .SingleInstance();
 
-            builder
-                .RegisterInstance(new ApiTraceManager(Program.Settings.ElkLogs, "api-trace", Program.LoggerFactory.CreateLogger("ApiTraceManager")))
-                .As<IApiTraceManager>()
-                .As<IStartable>()
-                .AutoActivate()
-                .SingleInstance();
+
+            if (Program.Settings.EnableApiTrace)
+            {
+                builder
+                    .RegisterInstance(new ApiTraceManager(Program.Settings.ElkLogs, "api-trace",
+                        Program.LoggerFactory.CreateLogger("ApiTraceManager")))
+                    .As<IApiTraceManager>()
+                    .As<IStartable>()
+                    .AutoActivate()
+                    .SingleInstance();
+            }
         }
     }
 }
