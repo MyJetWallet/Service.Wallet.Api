@@ -102,9 +102,16 @@ namespace Service.Wallet.Api
             app.UseForwardedHeaders();
 
             if (Program.Settings.EnableApiTrace)
+            {
                 app.UseMiddleware<ApiTraceMiddleware>();
+                Console.WriteLine("API Trace is Enabled");
+            }
+            else
+            {
+                Console.WriteLine("API Trace is Disabled");
+            }
 
-            
+
             app.BindMetricsMiddleware();
             
             if (env.IsDevelopment())
