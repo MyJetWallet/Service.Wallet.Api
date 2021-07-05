@@ -51,6 +51,7 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterBalanceHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
             builder.RegisterTradeHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
             builder.RegisterSwapHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
+            builder.RegisterCashInOutHistoryClient(Program.Settings.BalanceHistoryGrpcServiceUrl);
             
             builder.RegisterLiquidityConverterClient(Program.Settings.LiquidityConverterGrpcServiceUrl);
 
