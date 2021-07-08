@@ -146,6 +146,7 @@ namespace Service.Wallet.Api.Hubs
 
             await ctx.SendWalletAssetsAsync();
             await ctx.SendWalletSpotInstrumentsAsync();
+            await ctx.SendMarketReferenceAsync();
             await ctx.SendWalletBalancesAsync();
             await ctx.SendActiveOrdersAsync();
 

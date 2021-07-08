@@ -61,5 +61,10 @@
         /// [incoming] Init the connection
         /// </summary>
         public const string SetOrderBook = "SetOrderBook";
+        
+        /// <summary>
+        /// List of market references 
+        /// </summary>
+        public const string MarketReference = "market-reference";
     }
 }

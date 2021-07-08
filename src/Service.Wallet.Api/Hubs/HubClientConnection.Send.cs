@@ -10,6 +10,7 @@ using MyJetWallet.Domain.Prices;
 using Service.ActiveOrders.Grpc.Models;
 using Service.Balances.Domain.Models;
 using Service.Balances.Grpc;
+using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Hubs.Dto;
 
 namespace Service.Wallet.Api.Hubs
@@ -55,6 +56,39 @@ namespace Service.Wallet.Api.Hubs
             };
 
             await SendAsync(HubNames.SpotInstrumentList, message);
+        }
+        
+        public async Task SendMarketReferenceAsync()
+        {
+            var references = new List<MarketReferenceResponse>()
+            {
+                new MarketReferenceResponse()
+                {
+                    Id = "BTC",
+                    Name = "Bitcoin",
+                    AssociateAsset = "BTC",
+                    AssociateAssetPair = "BTCUSD",
+                    BrokerId = "myjetwallet",
+                    IconUrl = "",
+                    Weight = 100
+                },
+                new MarketReferenceResponse()
+                {
+                    Id = "ETH",
+                    Name = "Ethereum",
+                    AssociateAsset = "ETH",
+                    AssociateAssetPair = "ETHUSD",
+                    BrokerId = "myjetwallet",
+                    IconUrl = "",
+                    Weight = 100
+                },
+            };
+            var message = new MarketReferenceListMessage()
+            {
+                References = references
+            };
+
+            await SendAsync(HubNames.MarketReference, message);
         }
         
         private JetClientIdentity GetClientId()

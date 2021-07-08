@@ -43,5 +43,11 @@ namespace Service.Wallet.Api.Controllers
 
             return new Response<GetSessionInfoResponse>(response);
         }
+        
+        [AllowAnonymous]
+        [HttpGet("server-time")]
+        public DateTime GetServerTime() => DateTime.UtcNow;
+        
+        
     }
 }
