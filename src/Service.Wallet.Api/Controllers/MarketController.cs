@@ -28,16 +28,6 @@ namespace Service.Wallet.Api.Controllers
                 },
                 new MarketReferenceResponse()
                 {
-                    Id = "BTCEur",
-                    Name = "Bitcoin",
-                    AssociateAsset = "BTC",
-                    AssociateAssetPair = "BTCEUR",
-                    BrokerId = "myjetwallet",
-                    IconUrl = "",
-                    Weight = 90
-                },
-                new MarketReferenceResponse()
-                {
                     Id = "ETH",
                     Name = "Ethereum",
                     AssociateAsset = "ETH",
@@ -46,16 +36,6 @@ namespace Service.Wallet.Api.Controllers
                     IconUrl = "",
                     Weight = 100
                 },
-                new MarketReferenceResponse()
-                {
-                    Id = "ETHtoBTC",
-                    Name = "Ethereum",
-                    AssociateAsset = "ETH",
-                    AssociateAssetPair = "BTCETH",
-                    BrokerId = "myjetwallet",
-                    IconUrl = "",
-                    Weight = 80
-                }
             };
             return new Response<List<MarketReferenceResponse>>(response);
         }
