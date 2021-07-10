@@ -21,7 +21,7 @@
     <PackageReference Include="MyJetWallet.Domain" Version="1.0.30" />
     <PackageReference Include="MyJetWallet.Domain.ServiceBus" Version="1.2.0" />
     <PackageReference Include="MyJetWallet.Sdk.Authorization" Version="1.1.0" />
-    <PackageReference Include="MyJetWallet.Sdk.NoSql" Version="1.0.4" />
+    <PackageReference Include="MyJetWallet.Sdk.NoSql" Version="1.0.6" />
     <PackageReference Include="MyJetWallet.Sdk.RestApiTrace" Version="1.0.7" />
     <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.5.5" />
     <PackageReference Include="MyJetWallet.Service.ActiveOrders.Client" Version="1.0.3" />
