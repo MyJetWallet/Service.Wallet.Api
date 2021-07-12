@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain;
+using MyNoSqlServer.Abstractions;
 using Service.ActiveOrders.Grpc;
 using Service.Balances.Grpc;
 using Service.BaseCurrencyConverter.Grpc;
+using Service.FrontendKeyValue.Domain.Models.NoSql;
+using Service.FrontendKeyValue.Grpc;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Wallet.Api.Controllers;
 using Service.Wallet.Api.Domain.Assets;
@@ -20,6 +23,7 @@ namespace Service.Wallet.Api.Hubs
         private readonly ICurrentPricesCache _currentPricesCache;
         private readonly IWalletBalanceService _balanceService;
         private readonly IActiveOrderService _activeOrderService;
+        private readonly IFrontKeyValueService _frontKeyValueService;
         private readonly ILogger _logger;
 
         public HubClientConnection(HubCallerContext context,
@@ -30,6 +34,7 @@ namespace Service.Wallet.Api.Hubs
             ICurrentPricesCache currentPricesCache,
             IWalletBalanceService balanceService, 
             IActiveOrderService activeOrderService,
+            IFrontKeyValueService frontKeyValueService,
             ILogger logger)
         {
             _context = context;
@@ -38,6 +43,7 @@ namespace Service.Wallet.Api.Hubs
             _currentPricesCache = currentPricesCache;
             _balanceService = balanceService;
             _activeOrderService = activeOrderService;
+            _frontKeyValueService = frontKeyValueService;
             _logger = logger;
             ClientProxy = client;
 

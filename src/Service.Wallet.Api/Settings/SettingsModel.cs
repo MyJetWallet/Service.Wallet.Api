@@ -61,5 +61,8 @@ namespace Service.Wallet.Api.Settings
 
         [YamlProperty("WalletApi.EnableApiTrace")]
         public bool EnableApiTrace { get; set; }
+
+        [YamlProperty("WalletApi.FrontendKeyValueGrpcServiceUrl")]
+        public string FrontendKeyValueGrpcServiceUrl { get; set; }
     }
 }

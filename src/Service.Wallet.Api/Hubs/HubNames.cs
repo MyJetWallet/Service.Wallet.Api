@@ -66,5 +66,10 @@
         /// List of market references 
         /// </summary>
         public const string MarketReference = "market-reference";
+
+        /// <summary>
+        /// List of frontend key-values
+        /// </summary>
+        public const string KeyValues = "key-values";
     }
 }

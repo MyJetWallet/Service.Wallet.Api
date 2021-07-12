@@ -10,6 +10,7 @@ using MyNoSqlServer.Abstractions;
 using Newtonsoft.Json;
 using Service.ActiveOrders.Grpc;
 using Service.Balances.Grpc;
+using Service.FrontendKeyValue.Grpc;
 using Service.MatchingEngine.PriceSource.Client;
 using Service.Registration.Grpc;
 using Service.Wallet.Api.Domain.Assets;
@@ -33,6 +34,7 @@ namespace Service.Wallet.Api.Hubs
         private readonly IWalletBalanceService _balanceService;
         private readonly IActiveOrderService _orderService;
         private readonly IMyNoSqlServerDataReader<ShortRootSessionNoSqlEntity> _sessionReader;
+        private readonly IFrontKeyValueService _frontKeyValueService;
 
 
         public const string AccessTokenParamName = "access_token";
@@ -45,7 +47,8 @@ namespace Service.Wallet.Api.Hubs
             IClientRegistrationService clientRegistrationService,
             IWalletBalanceService balanceService,
             IActiveOrderService orderService,
-            IMyNoSqlServerDataReader<ShortRootSessionNoSqlEntity> sessionReader)
+            IMyNoSqlServerDataReader<ShortRootSessionNoSqlEntity> sessionReader,
+            IFrontKeyValueService frontKeyValueService)
         {
             _logger = logger;
             _hubManager = hubManager;
@@ -56,6 +59,7 @@ namespace Service.Wallet.Api.Hubs
             _balanceService = balanceService;
             _orderService = orderService;
             _sessionReader = sessionReader;
+            _frontKeyValueService = frontKeyValueService;
         }
 
         public override async Task OnConnectedAsync()
@@ -126,7 +130,7 @@ namespace Service.Wallet.Api.Hubs
 
             var clientId = new JetClientIdentity(AuthorizationConst.DefaultBrokerId, token.BrandId, token.TraderId());
             
-            var ctx = new HubClientConnection(Context, Clients.Caller, clientId, _assetService, _walletService, _currentPricesCache, _balanceService, _orderService, _logger);
+            var ctx = new HubClientConnection(Context, Clients.Caller, clientId, _assetService, _walletService, _currentPricesCache, _balanceService, _orderService, _frontKeyValueService, _logger);
 
             var wallet = await _walletService.GetDefaultWalletAsync(clientId);
 
@@ -143,6 +147,8 @@ namespace Service.Wallet.Api.Hubs
             //todo: Send wallet list (wallet name, walletId, is default)
 
             await ctx.SendWalletListAsync();
+
+            await ctx.SendKeyValuesAsync();
 
             await ctx.SendWalletAssetsAsync();
             await ctx.SendWalletSpotInstrumentsAsync();

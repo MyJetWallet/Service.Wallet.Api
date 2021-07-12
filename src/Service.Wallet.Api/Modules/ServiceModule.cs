@@ -69,6 +69,12 @@ namespace Service.Wallet.Api.Modules
                 .AutoActivate()
                 .SingleInstance();
 
+            builder
+                .RegisterType<FrontKeyValueNotificator>()
+                .As<IStartable>()
+                .AutoActivate()
+                .SingleInstance();
+
 
             if (Program.Settings.EnableApiTrace)
             {

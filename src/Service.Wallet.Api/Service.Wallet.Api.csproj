@@ -18,7 +18,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
-    <PackageReference Include="MyJetWallet.Domain" Version="1.0.30" />
+    <PackageReference Include="MyJetWallet.Domain" Version="1.0.31" />
     <PackageReference Include="MyJetWallet.Domain.ServiceBus" Version="1.2.0" />
     <PackageReference Include="MyJetWallet.Sdk.Authorization" Version="1.1.0" />
     <PackageReference Include="MyJetWallet.Sdk.NoSql" Version="1.1.1" />
@@ -31,7 +31,7 @@
     <PackageReference Include="MyJetWallet.Service.Bitgo.DepositDetector.Client" Version="1.1.2" />
     <PackageReference Include="MyJetWallet.Service.Bitgo.DepositDetector.Client" Version="1.1.2" />
     <PackageReference Include="MyJetWallet.Service.Bitgo.WithdrawalProcessor.Client" Version="1.0.1" />
-    <PackageReference Include="MyJetWallet.Service.FrontendKeyValue.Client" Version="1.0.2" />
+    <PackageReference Include="MyJetWallet.Service.FrontendKeyValue.Client" Version="1.0.3" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.Api.Client" Version="1.0.2" />
     <PackageReference Include="MyJetWallet.Service.MatchingEngine.PriceSource.Client" Version="1.2.1" />
     <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.1.1" />

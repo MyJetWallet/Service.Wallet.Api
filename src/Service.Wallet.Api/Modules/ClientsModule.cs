@@ -11,6 +11,7 @@ using Service.BaseCurrencyConverter.Client;
 using Service.Bitgo.DepositDetector.Client;
 using Service.Bitgo.WithdrawalProcessor.Client;
 using Service.ClientWallets.Client;
+using Service.FrontendKeyValue.Client;
 using Service.Liquidity.Converter.Client;
 using Service.MatchingEngine.Api.Client;
 using Service.MatchingEngine.PriceSource.Client;
@@ -58,6 +59,8 @@ namespace Service.Wallet.Api.Modules
             builder.RegisterBaseCurrencyConverterClient(Program.Settings.BaseCurrencyConverterGrpcServiceUrl, myNoSqlClient);
             
             builder.RegisterPushNotificationClient(Program.Settings.PushNotificationGrpcServiceUrl);
+
+            builder.RegisterFrontendKeyValueClient(myNoSqlClient, Program.Settings.FrontendKeyValueGrpcServiceUrl);
 
             RegisterAuthServices(builder);
         }

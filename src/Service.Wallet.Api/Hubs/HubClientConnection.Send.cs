@@ -10,6 +10,7 @@ using MyJetWallet.Domain.Prices;
 using Service.ActiveOrders.Grpc.Models;
 using Service.Balances.Domain.Models;
 using Service.Balances.Grpc;
+using Service.FrontendKeyValue.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
 using Service.Wallet.Api.Hubs.Dto;
 
@@ -179,6 +180,19 @@ namespace Service.Wallet.Api.Hubs
         {
             
 
+        }
+
+        public async Task SendKeyValuesAsync()
+        {
+            var data = await _frontKeyValueService.GetKeysAsync(
+                new GetFrontKeysRequest() {ClientId = WalletId.ClientId});
+
+            var message = new FrontendKeyValues()
+            {
+                Keys = data.KeyValues
+            };
+
+            await SendAsync(HubNames.KeyValues, message);
         }
     }
 }

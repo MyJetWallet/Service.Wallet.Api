@@ -16,9 +16,9 @@ namespace TestApp
             Console.ReadLine();
 
             var connection = new HubConnectionBuilder()
-                //.WithUrl("http://localhost:8080/signalr")
+                .WithUrl("http://localhost:8080/signalr")
                 //.WithUrl("http://wallet-api.services.svc.cluster.local:8080/signalr")
-                .WithUrl("https://wallet-api-spot.mnftx.biz/signalr")
+                //.WithUrl("https://wallet-api-spot.mnftx.biz/signalr")
                 //.WithUrl("http://20.50.189.25:8080/signalr")
                 //.AddMessagePackProtocol()
                 .Build();
@@ -26,7 +26,7 @@ namespace TestApp
 
             connection.Closed += async (error) =>
             {
-                Console.WriteLine($"Connection is closed. Exception: {error.ToString()}");
+                Console.WriteLine($"Connection is closed. Exception: {error?.ToString()}");
             };
 
             connection.Reconnected += async (s) =>
@@ -70,15 +70,20 @@ namespace TestApp
                 Console.WriteLine($"--> [{HubNames.Trades}] {JsonConvert.SerializeObject(message)}\r\n");
             });
 
-            connection.On<BidAskMessage>(HubNames.BidAsk, message =>
+            //connection.On<BidAskMessage>(HubNames.BidAsk, message =>
+            //{
+            //    Console.WriteLine($"--> {JsonConvert.SerializeObject(message)}");
+
+            //    foreach (var price in message.Prices)
+            //    {
+
+            //        Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime}\r\n");
+            //    }
+            //});
+
+            connection.On<FrontendKeyValues>(HubNames.KeyValues, message =>
             {
-                Console.WriteLine($"--> {JsonConvert.SerializeObject(message)}");
-
-                foreach (var price in message.Prices)
-                {
-
-                    Console.WriteLine($"--> [{HubNames.BidAsk}] {price.Id} {price.Bid} {price.Ask} {price.DateTime}\r\n");
-                }
+                Console.WriteLine($"--> [{HubNames.KeyValues}] {JsonConvert.SerializeObject(message)}\r\n");
             });
 
             connection.On<ActiveOrdersMessage>(HubNames.ActiveOrders, message =>
@@ -102,7 +107,7 @@ namespace TestApp
 
             await connection.StartAsync();
 
-            await connection.SendAsync(HubNames.Init, "GCMTUp97+7F6Dizf5GxlF9sa+tqKOtroAnJfcZCBETZTEu7pmf3Xo++bbyf7rJALv9vaP57to9S/LAFaNauVCq72SyjcXQ+eQPpGlKGH31k7GqudrJRZTI8bVOTm/422Wds+4CAtBURsPXe6pS2B2A==");
+            await connection.SendAsync(HubNames.Init, "yUZ8viLFpO1Xm5LsKElf78MDnNsFe9ZfkQz0qT1ZkCBUEpF1sWaJZt0rJ4PgcVE6BjqqVt8iI/nUuFB1hzrS5hRiieWm7Ty/fZHz3zEdSn6ZAQpxxmIOYVx/eOC5H8q4EyS330QLGp5XqRlZIS8kP2d+1mppBtUm+CklDTZKw1s=");
 
             var run = true;
 

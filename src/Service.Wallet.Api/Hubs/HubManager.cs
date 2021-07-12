@@ -15,6 +15,8 @@ namespace Service.Wallet.Api.Hubs
         Task ExecForeachConnection(Func<HubClientConnection, Task> func);
 
         IEnumerable<HubClientConnection> TryGetContextByWalletId(string walletId);
+
+        IEnumerable<HubClientConnection> TryGetContextByClientId(string clientId);
     }
 
     public class HubManager: IHubManager
@@ -58,6 +60,13 @@ namespace Service.Wallet.Api.Hubs
         {
             //todo: need to optimize, add dictionary by wallet id
             var data = _hubConnections.GetByCondition(e => e?.WalletId.WalletId == walletId);
+            return data;
+        }
+
+        public IEnumerable<HubClientConnection> TryGetContextByClientId(string clientId)
+        {
+            //todo: need to optimize, add dictionary by client id
+            var data = _hubConnections.GetByCondition(e => e?.WalletId.ClientId == clientId);
             return data;
         }
     }
