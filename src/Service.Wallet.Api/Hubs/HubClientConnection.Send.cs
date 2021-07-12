@@ -60,29 +60,10 @@ namespace Service.Wallet.Api.Hubs
         
         public async Task SendMarketReferenceAsync()
         {
-            var references = new List<MarketReferenceResponse>()
-            {
-                new MarketReferenceResponse()
-                {
-                    Id = "BTC",
-                    Name = "Bitcoin",
-                    AssociateAsset = "BTC",
-                    AssociateAssetPair = "BTCUSD",
-                    BrokerId = "myjetwallet",
-                    IconUrl = "",
-                    Weight = 100
-                },
-                new MarketReferenceResponse()
-                {
-                    Id = "ETH",
-                    Name = "Ethereum",
-                    AssociateAsset = "ETH",
-                    AssociateAssetPair = "ETHUSD",
-                    BrokerId = "myjetwallet",
-                    IconUrl = "",
-                    Weight = 100
-                },
-            };
+            var wallet = GetWalletId();
+
+            var references = _assetService.GetMarketReference(wallet);
+
             var message = new MarketReferenceListMessage()
             {
                 References = references

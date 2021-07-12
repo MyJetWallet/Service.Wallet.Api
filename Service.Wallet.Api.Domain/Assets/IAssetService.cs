@@ -11,6 +11,7 @@ namespace Service.Wallet.Api.Domain.Assets
     {
         List<WalletAsset> GetWalletAssets(IJetWalletIdentity wallet);
         List<WalletSpotInstrument> GetWalletSpotInstrument(IJetWalletIdentity wallet);
+        List<MarketReference> GetMarketReference(IJetWalletIdentity wallet);
         void SubscribeToChanges(Action callback);
     }
 }

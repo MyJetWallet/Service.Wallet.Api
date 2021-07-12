@@ -18,7 +18,7 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.7" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
-    <PackageReference Include="MyJetWallet.Domain" Version="1.0.30" />
+    <PackageReference Include="MyJetWallet.Domain" Version="1.0.31" />
     <PackageReference Include="MyJetWallet.Domain.ServiceBus" Version="1.2.0" />
     <PackageReference Include="MyJetWallet.Sdk.Authorization" Version="1.1.0" />
     <PackageReference Include="MyJetWallet.Sdk.NoSql" Version="1.1.1" />

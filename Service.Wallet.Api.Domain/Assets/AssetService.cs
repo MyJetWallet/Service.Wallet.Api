@@ -7,6 +7,7 @@ using MyJetWallet.Domain;
 using Service.AssetsDictionary.Client;
 using Service.AssetsDictionary.Domain.Models;
 using Service.Wallet.Api.Domain.Models.Assets;
+using MarketReference = Service.Wallet.Api.Domain.Models.Assets.MarketReference;
 
 namespace Service.Wallet.Api.Domain.Assets
 {
@@ -15,25 +16,31 @@ namespace Service.Wallet.Api.Domain.Assets
         private readonly IAssetsDictionaryClient _assetsDictionaryClient;
         private readonly ISpotInstrumentDictionaryClient _spotInstrumentDictionaryClient;
         private readonly IAssetPaymentSettingsClient _paymentSettingsClient;
+        private readonly IMarketReferenceDictionaryClient _marketReferenceDictionaryClient;
         private readonly ILogger<AssetService> _logger;
 
         private Dictionary<string, List<WalletAsset>> _assetCache = new Dictionary<string, List<WalletAsset>>();
         private Dictionary<string, List<WalletSpotInstrument>> _instrumentCache = new Dictionary<string, List<WalletSpotInstrument>>();
+        private Dictionary<string, List<MarketReference>> _referenceCache = new Dictionary<string, List<MarketReference>>();
+
         private List<Action> _callbackList = new List<Action>();
 
         public AssetService(
             IAssetsDictionaryClient assetsDictionaryClient,
             ISpotInstrumentDictionaryClient spotInstrumentDictionaryClient,
             IAssetPaymentSettingsClient paymentSettingsClient,
+            IMarketReferenceDictionaryClient marketReferenceDictionaryClient,
             ILogger<AssetService> logger)
         {
             _assetsDictionaryClient = assetsDictionaryClient;
             _spotInstrumentDictionaryClient = spotInstrumentDictionaryClient;
             _paymentSettingsClient = paymentSettingsClient;
+            _marketReferenceDictionaryClient = marketReferenceDictionaryClient;
             _logger = logger;
             _assetsDictionaryClient.OnChanged += NoSqlDataChanged;
             _spotInstrumentDictionaryClient.OnChanged += NoSqlDataChanged;
             _paymentSettingsClient.OnChanged += NoSqlDataChanged;
+            _marketReferenceDictionaryClient.OnChanged += NoSqlDataChanged;
         }
 
         private void NoSqlDataChanged()
@@ -48,6 +55,11 @@ namespace Service.Wallet.Api.Domain.Assets
                 _assetCache.Clear();
             }
 
+            lock (_referenceCache)
+            {
+                _referenceCache.Clear();
+            }
+            
             RaiseChange();
         }
 
@@ -79,6 +91,29 @@ namespace Service.Wallet.Api.Domain.Assets
             }
 
             return instruments;
+        }
+
+        public List<MarketReference> GetMarketReference(IJetWalletIdentity wallet)
+        {
+            lock (_referenceCache)
+            {
+                if (_referenceCache.TryGetValue(wallet.BrandId, out var result))
+                {
+                    return result;
+                }
+            }
+            
+            var references = _marketReferenceDictionaryClient
+                .GetMarketReferencesByBrand(wallet)
+                .Select(MarketReference.Create)
+                .ToList();
+            
+            lock (_referenceCache)
+            {
+                _referenceCache[wallet.BrandId] = references;
+            }
+
+            return references;
         }
 
         public void SubscribeToChanges(Action callback)
