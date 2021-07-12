@@ -50,9 +50,11 @@ namespace Service.Wallet.Api.Settings
         [YamlProperty("WalletApi.PushNotificationGrpcServiceUrl")]
         public string PushNotificationGrpcServiceUrl { get; set; }
 
-        [YamlProperty("WalletApi.ZipkinUrl")] public string ZipkinUrl { get; set; }
+        [YamlProperty("WalletApi.ZipkinUrl")] 
+        public string ZipkinUrl { get; set; }
 
-        [YamlProperty("WalletApi.ElkLogs")] public LogElkSettings ElkLogs { get; set; }
+        [YamlProperty("WalletApi.ElkLogs")] 
+        public LogElkSettings ElkLogs { get; set; }
 
         [YamlProperty("WalletApi.BaseCurrencyConverterGrpcServiceUrl")]
         public string BaseCurrencyConverterGrpcServiceUrl { get; set; }

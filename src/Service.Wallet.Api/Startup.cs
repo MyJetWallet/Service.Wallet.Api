@@ -130,8 +130,15 @@ namespace Service.Wallet.Api
 
             app.BindIsAlive(GetEnvVariables());
 
-            app.UseOpenApi();
-            app.UseSwaggerUi3();
+            app.UseOpenApi(settings =>
+            {
+                settings.Path = "/swagger/api/swagger.json";
+            });
+            app.UseSwaggerUi3(settings =>
+            {
+                settings.Path = "/swagger/api";
+                settings.DocumentPath = "/swagger/api/swagger.json";
+            });
 
             app.BindDebugMiddleware();
 
