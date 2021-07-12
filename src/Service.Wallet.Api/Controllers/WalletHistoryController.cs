@@ -27,19 +27,21 @@ namespace Service.Wallet.Api.Controllers
 
         private readonly IAssetsDictionaryClient _assetsDictionaryClient;
         private readonly ISwapHistoryService _swapHistoryService;
+        private readonly ICashInOutHistoryService _cashInOutHistoryService;
 
         private readonly IWalletService _walletService;
         //todo: get order by id
         //todo: get trade by id
 
         public WalletHistoryController(IWalletTradeService walletTradeService, IWalletBalanceUpdateService balanceUpdateService, IAssetsDictionaryClient assetsDictionaryClient,
-            IWalletService walletService, ISwapHistoryService swapHistoryService)
+            IWalletService walletService, ISwapHistoryService swapHistoryService, ICashInOutHistoryService cashInOutHistoryService)
         {
             _walletTradeService = walletTradeService;
             _balanceUpdateService = balanceUpdateService;
             _assetsDictionaryClient = assetsDictionaryClient;
             _walletService = walletService;
             _swapHistoryService = swapHistoryService;
+            _cashInOutHistoryService = cashInOutHistoryService;
         }
 
         [HttpGet("balance-history")]
@@ -139,6 +141,25 @@ namespace Service.Wallet.Api.Controllers
             }
             var data = await _swapHistoryService.GetSwapsAsync(request);
             return new Response<List<Swap>>(data.SwapCollection);
+        }
+        
+        [HttpGet("cashinout-history")]
+        public async Task<Response<List<CashInOutUpdate>>> GetCashInOutHistory([FromQuery][CanBeNull] string assetSymbol, [FromQuery][CanBeNull] int? take, [FromQuery][CanBeNull] long? lastSequenceId, [FromQuery][CanBeNull] string operationType)
+        {
+            var clientId = this.GetClientIdentity();
+            var wallet = await _walletService.GetDefaultWalletAsync(clientId);
+            
+            var request = new GetCashInOutRequest()
+            {
+                Take = take,
+                LastSequenceId = lastSequenceId,
+                Symbol = assetSymbol,
+                WalletId = wallet.WalletId,
+                OperationType = operationType
+            };
+
+            var data = await _cashInOutHistoryService.GetCashInOutUpdatesAsync(request);
+            return new Response<List<CashInOutUpdate>>(data.CashInOutUpdates);
         }
     }
 }
