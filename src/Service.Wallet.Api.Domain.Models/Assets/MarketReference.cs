@@ -17,7 +17,7 @@ namespace Service.Wallet.Api.Domain.Models.Assets
             return new MarketReference()
             {
                 Id = reference.Id,
-                AssociateAsset = reference.Id,
+                AssociateAsset = reference.AssociateAsset,
                 AssociateAssetPair = reference.AssociateAssetPair,
                 BrokerId = reference.BrokerId,
                 IconUrl = reference.IconUrl,
