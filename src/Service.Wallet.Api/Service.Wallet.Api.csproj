@@ -15,12 +15,12 @@
     <PackageReference Include="DotNetCoreDecorators" Version="1.0.21" />
     <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.17.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="5.0.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="MyJetWallet.Domain" Version="1.0.31" />
     <PackageReference Include="MyJetWallet.Domain.ServiceBus" Version="1.2.0" />
-    <PackageReference Include="MyJetWallet.Sdk.Authorization" Version="1.1.0" />
+    <PackageReference Include="MyJetWallet.Sdk.Authorization" Version="1.1.2" />
     <PackageReference Include="MyJetWallet.Sdk.NoSql" Version="1.1.1" />
     <PackageReference Include="MyJetWallet.Sdk.RestApiTrace" Version="1.0.7" />
     <PackageReference Include="MyJetWallet.Sdk.Service" Version="1.5.5" />
