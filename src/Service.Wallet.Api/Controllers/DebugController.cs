@@ -13,7 +13,7 @@ using SimpleTrading.ClientApi.Utils;
 namespace Service.Wallet.Api.Controllers
 {
     [ApiController]
-    [Route("/api/Debug")]
+    [Route("/api/debug")]
     public class DebugController: ControllerBase
     {
         /// <summary>
