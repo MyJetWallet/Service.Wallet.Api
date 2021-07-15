@@ -1,21 +1,14 @@
 ﻿using System;
-using System.IO;
 using System.Security.Cryptography;
-using System.Text;
-using System.Web;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyJetWallet.Domain;
 using MyJetWallet.Sdk.Authorization;
 using MyJetWallet.Sdk.Authorization.Http;
-using MyTcpSockets.Extensions;
+using MyJetWallet.Sdk.WalletApi.Common;
 using Newtonsoft.Json;
 using Service.Wallet.Api.Controllers.Contracts;
-using Service.Wallet.Api.Domain.Common;
 using SimpleTrading.ClientApi.Utils;
-using SimpleTrading.TokensManager;
-using SimpleTrading.TokensManager.Tokens;
 
 namespace Service.Wallet.Api.Controllers
 {
@@ -105,7 +98,7 @@ namespace Service.Wallet.Api.Controllers
         }
 
         [HttpGet("verified-email-only")]        
-        [Authorize(Policy = AuthorizationPolicies.VerifiedEmailPolicy)]
+        [WalletAuthorize]
         public IActionResult WhoWithVerifiedEmail()
         {
             var clientId = this.GetClientId();

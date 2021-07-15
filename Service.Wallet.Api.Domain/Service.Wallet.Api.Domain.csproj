@@ -7,19 +7,8 @@
 
   <ItemGroup>
     <PackageReference Include="MyJetWallet.Domain" Version="1.0.31" />
-    <PackageReference Include="MyJetWallet.Service.Balances.Client" Version="1.0.7" />
     <PackageReference Include="MyJetWallet.Service.ClientWallets.Client" Version="1.2.0" />
-    <PackageReference Include="MyJetWallet.Service.MatchingEngine.Api.Client" Version="1.0.2" />
-    <PackageReference Include="MyJetWallet.Service.Liquidity.Converter.Client" Version="1.1.1" />
     <PackageReference Include="MyJetWallet.Service.Service.KYC.Client" Version="1.0.6" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\src\Service.Wallet.Api.Domain.Models\Service.Wallet.Api.Domain.Models.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Swaps\" />
   </ItemGroup>
 
 </Project>

@@ -5,10 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference PrivateAssets="All" Include="..\Service.Wallet.Api.Domain.Models\Service.Wallet.Api.Domain.Models.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Grpc.Core.Api" Version="2.38.1" />
     <PackageReference Include="JetBrains.Annotations" Version="2021.1.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.38.0" />

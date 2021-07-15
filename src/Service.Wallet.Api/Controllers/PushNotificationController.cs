@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Sdk.Authorization.Http;
+using MyJetWallet.Sdk.WalletApi;
+using MyJetWallet.Sdk.WalletApi.Contracts;
 using Serilog;
 using Service.PushNotification.Domain.Models;
 using Service.PushNotification.Grpc;
@@ -48,7 +50,7 @@ namespace Service.Wallet.Api.Controllers
                 UserAgent = userAgent
             });
             _logger.LogInformation("Received token {Token} and locale {UserLocale}", request.Token, request.UserLocale);
-            return Contracts.Response.OK();
+            return MyJetWallet.Sdk.WalletApi.Contracts.Response.OK();
         }
     }
 }

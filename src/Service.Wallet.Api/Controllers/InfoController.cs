@@ -3,8 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyJetWallet.Sdk.Authorization.Http;
+using MyJetWallet.Sdk.WalletApi;
+using MyJetWallet.Sdk.WalletApi.Contracts;
+using MyJetWallet.Sdk.WalletApi.Wallets;
 using Service.Wallet.Api.Controllers.Contracts;
-using Service.Wallet.Api.Domain.Wallets;
 
 namespace Service.Wallet.Api.Controllers
 {

@@ -5,16 +5,16 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyJetWallet.Domain.Assets;
+using MyJetWallet.Sdk.WalletApi;
+using MyJetWallet.Sdk.WalletApi.Contracts;
+using MyJetWallet.Sdk.WalletApi.Wallets;
 using Service.AssetsDictionary.Client;
-using Service.Balances.Grpc;
 using Service.Bitgo.DepositDetector.Domain.Models;
 using Service.Bitgo.WithdrawalProcessor.Grpc.Models;
 using Service.Service.KYC.Client;
 using Service.Service.KYC.Domain.Models;
 using Service.Service.KYC.Grpc.Models;
 using Service.Wallet.Api.Controllers.Contracts;
-using Service.Wallet.Api.Domain.Contracts;
-using Service.Wallet.Api.Domain.Wallets;
 using Service.Wallet.Api.Services;
 
 namespace Service.Wallet.Api.Controllers
@@ -27,7 +27,6 @@ namespace Service.Wallet.Api.Controllers
         private readonly ILogger<BlockchainController> _logger;
         private readonly IBlockchainIntegrationService _blockchainIntegrationService;
         private readonly IAssetsDictionaryClient _assetsDictionaryClient;
-        private readonly IWalletBalanceService _balanceService;
         private readonly IKycStatusClient _kycStatusClient;
         private readonly IAssetPaymentSettingsClient _assetPaymentSettingsClient;
         private readonly IWalletService _walletService;
@@ -35,7 +34,6 @@ namespace Service.Wallet.Api.Controllers
         public BlockchainController(ILogger<BlockchainController> logger,
             IBlockchainIntegrationService blockchainIntegrationService,
             IAssetsDictionaryClient assetsDictionaryClient,
-            IWalletBalanceService balanceService,
             IKycStatusClient kycStatusClient,
             IAssetPaymentSettingsClient assetPaymentSettingsClient,
             IWalletService walletService)
@@ -43,7 +41,6 @@ namespace Service.Wallet.Api.Controllers
             _logger = logger;
             _blockchainIntegrationService = blockchainIntegrationService;
             _assetsDictionaryClient = assetsDictionaryClient;
-            _balanceService = balanceService;
             _kycStatusClient = kycStatusClient;
             _assetPaymentSettingsClient = assetPaymentSettingsClient;
             _walletService = walletService;
@@ -151,11 +148,6 @@ namespace Service.Wallet.Api.Controllers
 
             if (amount <= minAmount)
                 throw new WalletApiErrorException($"Amount is small. Min amount should be {minAmount}", ApiResponseCodes.AmountIsSmall);
-
-            var balance = await _balanceService.GetBalancesByWalletAndSymbol(walletId.WalletId, asset.Symbol);
-
-            if (balance.Balance - balance.Reserve - amount <= -Double.Epsilon)
-                throw new WalletApiErrorException("Low balance", ApiResponseCodes.LowBalance);
 
             if (asset.KycRequiredForDeposit)
             {
